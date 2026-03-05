@@ -1,0 +1,39 @@
+# --- System & IDE ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.sw?
+.trash
+
+# --- Python / Django ---
+venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyd
+db.sqlite3
+*.sqlite3
+/backend/static/
+/backend/media/
+.env
+
+# --- Redis ---
+Redis/
+
+# --- Frontend (Vite + React) ---
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.eslintcache
+*.local
+
+# --- Logs ---
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*

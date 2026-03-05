@@ -1,0 +1,33 @@
+# --- System Files ---
+# Windows
+Thumbs.db
+desktop.ini
+# Linux
+.fuse_hidden
+*~
+.trash
+
+# --- Python ---
+venv/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+__pycache__/
+*__pycache__/
+*.pyc
+db.sqlite3
+.venv/
+
+# --- IDEs ---
+.vscode/
+# PyCharm / IntelliJ
+.idea/
+# Vim
+*.swp
+
+# --- Redis ---
+# Локальная папка с Redis, если она лежит в проекте
+Redis-x64-*/
+**/Redis-x64-*/
