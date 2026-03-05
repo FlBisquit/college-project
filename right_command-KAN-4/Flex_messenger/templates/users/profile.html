@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Профиль пользователя: {{ login }}</h2>
+    <img src="{{ avatar.url }}" alt="Аватар" width="100" height="100">
+    <p><strong>Имя пользователя:</strong> {{ login }}</p>
+    <p><strong>Пароль:</strong> {{ hidden_password }}</p>
+    <p><strong>Почта:</strong> {{ email }}</p>
+
+    <form action="/users/change/">
+        <h3>Редактивовать прфиль:<button>Редактировать</button></h3>
+        {% csrf_token %}
+    </form>
+    
+    
+</body>
+</html>
