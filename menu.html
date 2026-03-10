@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>W-Chat — Dashboard</title>
     <style>
-      
+        /* 1. Глобальные стили и фон */
         body {
             margin: 0;
             padding: 0;
@@ -23,6 +23,7 @@
             width: 100%;
         }
 
+        /* 2. Верхняя панель (Инфо пользователя) */
         .user-info {
             display: flex;
             justify-content: flex-end;
@@ -40,7 +41,7 @@
             font-size: 14px;
         }
 
-    
+        /* 3. Основные белые блоки */
         form, .games-section {
             background: white;
             border-radius: 40px;
@@ -57,7 +58,7 @@
             letter-spacing: -0.5px;
         }
 
-        
+        /* 4. Стилизация формы создания */
         form {
             display: flex;
             align-items: center;
@@ -100,7 +101,7 @@
             transform: translateY(-2px);
         }
 
-        
+        /* 5. Сетка карточек (UL) */
         ul {
             list-style: none;
             padding: 0;
@@ -110,7 +111,7 @@
             gap: 20px;
         }
 
-      
+        /* 6. Сама карточка (LI) */
         li {
             background: #9ca3af;
             aspect-ratio: 1/1;
@@ -119,7 +120,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-end; 
+            justify-content: flex-end; /* Текст будет внизу */
             padding-bottom: 15px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
@@ -130,7 +131,7 @@
             transform: scale(1.05);
         }
 
-       
+        /* Номер игры в центре карточки (едва заметный) */
         .chat-number {
             position: absolute;
             top: 50%;
@@ -142,7 +143,7 @@
             pointer-events: none;
         }
 
-       
+        /* Подписи "Участников" и "Owner" */
         .chat-info {
             font-size: 9px;
             text-transform: uppercase;
@@ -152,10 +153,10 @@
             pointer-events: none;
         }
 
-       
+        /* 7. Кнопки внутри карточки */
         .join-btn {
             position: absolute;
-            inset: 0; 
+            inset: 0; /* Растягиваем ссылку на всю площадь квадрата */
             z-index: 1;
             text-decoration: none;
             color: transparent;
