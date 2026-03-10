@@ -15,19 +15,19 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='server',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AddField(
-            model_name='serverdata',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='servers.server'),
-        ),
-        migrations.AddField(
-            model_name='serverdata',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+        migrations.CreateModel(
+            name='ServerMember',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('role', models.CharField(choices=[('owner', 'Владелец'), ('admin', 'Администратор'), ('member', 'Участник')], default='member', max_length=10)),
+                ('joined_at', models.DateTimeField(auto_now_add=True)),
+                ('server', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='server_members', to='servers.server')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='server_memberships', to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'verbose_name': 'Участник сервера',
+                'verbose_name_plural': 'Участники сервера',
+                'unique_together': {('server', 'user')},
+            },
         ),
     ]

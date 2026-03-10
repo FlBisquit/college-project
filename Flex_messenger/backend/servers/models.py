@@ -1,23 +1,43 @@
-from django.db.models import Model,CharField,JSONField,IntegerField,ForeignKey,BooleanField,CASCADE
-
-from uuid import uuid4
+import uuid
+from django.db import models
 from users.models import User
-def unic_number():
-    from random import randint
-    return f"{randint(0, 999999):06d}"
 
-def generate_uuid():
-    return str(uuid4())
 
-class Server(Model):
-    id = CharField(max_length=36, default=generate_uuid, primary_key=True)
-    number = CharField(max_length=6,default=unic_number)
-    owner = ForeignKey(User,on_delete=CASCADE)
-    max_chaters = IntegerField(default=12)
-    done = BooleanField(default=False)
-    started = BooleanField(default=False)
+class Server(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=20)
+    description = models.TextField(blank=True)
+    avatar = models.ImageField(upload_to='server_avatars/', blank=True, null=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_servers')
+    members = models.ManyToManyField(User, through='ServerMember', related_name='servers')
+    created_at = models.DateTimeField(auto_now_add=True)
 
-class ServerData(Model):
-    owner = ForeignKey(Server, on_delete=CASCADE)
-    user = ForeignKey(User, on_delete=CASCADE)
-    data = JSONField(default=dict)
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Сервер'
+        verbose_name_plural = 'Серверы'
+        ordering = ['-created_at']
+
+
+class ServerMember(models.Model):
+    """Участник сервера"""
+
+    class Role(models.TextChoices):
+        OWNER = 'owner', 'Владелец'
+        ADMIN = 'admin', 'Администратор'
+        MEMBER = 'member', 'Участник'
+
+    server = models.ForeignKey(Server, on_delete=models.CASCADE, related_name='server_members')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='server_memberships')
+    role = models.CharField(max_length=10, choices=Role.choices, default=Role.MEMBER)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('server', 'user')
+        verbose_name = 'Участник сервера'
+        verbose_name_plural = 'Участники сервера'
+
+    def __str__(self):
+        return f'{self.user.username} → {self.server.name} ({self.get_role_display()})'

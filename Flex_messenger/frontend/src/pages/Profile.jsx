@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
 function Profile() {
+  const BASE_URL = 'http://127.0.0.1:8000'
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
@@ -51,7 +52,7 @@ function Profile() {
 
   if (!user) return <div className="profile-loading">Loading...</div>;
 
-  const avatarSrc = avatarPreview || (user.avatar ? `http://127.0.0.1${user.avatar}` : null);
+  const avatarSrc = avatarPreview || (user.avatar ? `${BASE_URL}${user.avatar}` : null);
 
   return (
     <div className="auth-bg">
