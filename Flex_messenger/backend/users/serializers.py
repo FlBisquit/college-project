@@ -11,8 +11,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'bio', 'date_birth', 'avatar', 'created_at', 'is_online']
-        read_only_fields = ['id', 'username', 'created_at']
+        fields = ['id', 'username', 'email', 'bio', 'date_birth', 'avatar', 'created_at', 'last_seen', 'is_online']
+        read_only_fields = ['id', 'username', 'created_at', 'last_seen']
 
     def get_is_online(self, obj):
         return obj.is_online

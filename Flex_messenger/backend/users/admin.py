@@ -18,7 +18,10 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = UserAdmin.fieldsets + (
         ('Дополнительно', {
-            'fields': ('date_birth', 'avatar', 'bio')
+            'fields': ('date_birth', 'avatar', 'bio', 'is_banned')
+        }),
+        ('Активность', {
+            'fields': ('last_seen',)
         }),
     )
 

@@ -39,3 +39,11 @@ class UserService:
     @staticmethod
     def delete(user) -> None:
         user.delete()
+
+    @staticmethod
+    def update_profile(request) -> User:
+        """Валидация и обновление профиля"""
+        from .serializers import UserSerializer
+        serializer = UserSerializer(request.user, data=request.data, partial=True, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        return UserService.update(request.user, serializer.validated_data)

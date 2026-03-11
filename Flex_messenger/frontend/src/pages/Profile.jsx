@@ -5,23 +5,31 @@ import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
 function Profile() {
-  const BASE_URL = 'http://127.0.0.1:8000'
+  const BASE_URL = 'http://127.0.0.1:8000';
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const fileInputRef = useRef(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
-  const [nickname, setNickname] = useState('');
-  const [bio, setBio] = useState('');
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    bio: '',
+    date_birth: '',
+  });
   const [avatarFile, setAvatarFile] = useState(null);
-
+  const [saveMessage, setSaveMessage] = useState('');
 
   useEffect(() => {
     if (!user) {
       dispatch(getMe());
     } else {
-      setNickname(user.username || '');
-      setBio(user.bio || '');
+      setFormData({
+        username: user.username || '',
+        email: user.email || '',
+        bio: user.bio || '',
+        date_birth: user.date_birth || '',
+      });
     }
   }, [dispatch, user]);
 
@@ -42,23 +50,35 @@ function Profile() {
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSave = () => {
     dispatch(updateProfile({
-      username: nickname,
-      bio,
-      ...(avatarFile && { avatar: avatarFile }),
+      email: formData.email,
+      bio: formData.bio,
+      date_birth: formData.date_birth || null,
     }));
+    setSaveMessage('Profile updated!');
+    setTimeout(() => setSaveMessage(''), 3000);
   };
 
   if (!user) return <div className="profile-loading">Loading...</div>;
 
-  const avatarSrc = avatarPreview || (user.avatar ? `${BASE_URL}${user.avatar}` : null);
+  const avatarSrc = avatarPreview 
+    ? avatarPreview 
+    : user.avatar 
+      ? (user.avatar.startsWith('http') ? user.avatar : `${BASE_URL}${user.avatar}`)
+      : null;
 
   return (
     <div className="auth-bg">
-
       <div className="auth-card profile-card">
-
         <div className="profile-body">
           {/* Avatar */}
           <div className="profile-avatar-section">
@@ -94,9 +114,24 @@ function Profile() {
               <div className="auth-input-wrapper">
                 <input
                   type="text"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  placeholder="Your nickname"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="Your login"
+                  disabled
+                />
+              </div>
+            </div>
+
+            <div className="profile-field">
+              <label className="profile-label">Email</label>
+              <div className="auth-input-wrapper">
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="your@email.com"
                 />
               </div>
             </div>
@@ -105,12 +140,29 @@ function Profile() {
               <label className="profile-label">Bio</label>
               <textarea
                 className="profile-bio"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
+                name="bio"
+                value={formData.bio}
+                onChange={handleChange}
                 placeholder="Add a bio"
                 rows={4}
               />
             </div>
+
+            <div className="profile-field">
+              <label className="profile-label">Date of Birth</label>
+              <div className="auth-input-wrapper">
+                <input
+                  type="date"
+                  name="date_birth"
+                  value={formData.date_birth}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {saveMessage && (
+              <div className="save-message">{saveMessage}</div>
+            )}
           </div>
         </div>
 

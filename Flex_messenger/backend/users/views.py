@@ -31,7 +31,6 @@ class LoginView(generics.GenericAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data, context={'request': request})
-        # raise_exception вернёт 400, нам нужен 401
         if not serializer.is_valid():
             return Response(
                 {"detail": "Неверный логин или пароль"},
@@ -74,10 +73,11 @@ class ProfileView(generics.RetrieveUpdateDestroyAPIView):
         return self.request.user
 
     def update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(request.user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        user = UserService.update(request.user, serializer.validated_data)
-        return Response({"message": "Профиль обновлен", "user": UserSerializer(user).data})
+        user = UserService.update_profile(request)
+        return Response({
+            "message": "Профиль обновлен",
+            "user": UserSerializer(user, context={'request': request}).data
+        })
 
     def destroy(self, request, *args, **kwargs):
         UserService.delete(request.user)

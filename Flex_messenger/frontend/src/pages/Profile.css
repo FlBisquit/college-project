@@ -114,6 +114,17 @@
   box-shadow: 0 0 0 2px #2d2a5e44;
 }
 
+.save-message {
+  background: #4caf50;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  text-align: center;
+}
+
 /* ========== ACTIONS ========== */
 .profile-actions {
   display: flex;
