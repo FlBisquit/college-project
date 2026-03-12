@@ -17,11 +17,15 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthRequest = originalRequest.url.includes('/users/login/') || originalRequest.url.includes('/users/register/');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken) throw new Error("No refresh token");
+
         const response = await axios.post(
           'http://127.0.0.1:8000/api/users/refresh/',
           { refresh: refreshToken }
@@ -33,7 +37,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (err) {
         localStorage.clear();
-        window.location.href = '/login';
+        return Promise.reject(err);
       }
     }
 

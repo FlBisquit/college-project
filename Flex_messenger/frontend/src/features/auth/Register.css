@@ -94,6 +94,21 @@
   flex-shrink: 0;
 }
 
+.auth-input-toggle {
+  color: #9a9ab0;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.auth-input-toggle:hover {
+  color: #6b6b8a;
+  background: #e8e8f0;
+}
+
 .auth-input-wrapper input {
   border: none;
   background: transparent;
