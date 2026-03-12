@@ -36,7 +36,7 @@
             
             <div><strong>Номер:</strong> {{ chat.number }}</div>
             <div><strong>Участников:</strong> ...</div>
-            <a class="join-btn" href="/chats/join/{{ chat.id }}/">Присоединиться</a>
+            <a class="join-btn" href="/chatting/{{ chat.id }}/">Присоединиться</a>
             {% if user.id == chat.owner.id %}
             <a class="join-btn" href="/chats/delete/{{ chat.id }}/">Удалить</a>
             {% endif %}

@@ -39,7 +39,7 @@ def create_chat(request):
             max_chaters=max_chaters,
             chatName=chatName
         )
-        return HttpResponseRedirect('/chats/')
+        return HttpResponseRedirect('/users/')
     return HttpResponseRedirect('/')
 
 def delete_chat(request, chat_id):
