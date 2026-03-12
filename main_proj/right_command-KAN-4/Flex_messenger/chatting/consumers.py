@@ -21,7 +21,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
             message_type = data.get('type', 'text')
             
-            if message_type == 'text':
+            if message_type == 'text    ':
                 message = data.get('message', '').strip()
                 if message:
                     await self.save_message(message)
