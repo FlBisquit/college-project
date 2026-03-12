@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="/users/change_name/" method="POST">
+    {% csrf_token %}
+    <h2>Смена имени</h2>
+    <label>Ваш текущий ник:</label>
+    <input type="text" name="old_login" required><br><br>
+
+    <label>Пароль:</label>
+    <input type="password" name="password" required><br><br>
+
+    <label>Новый ник:</label>
+    <input type="text" name="new_login" required><br><br>
+
+    <button type="submit">Изменить</button>
+    </form>
+    <form action="/users/change_password/" method="POST">
+    {% csrf_token %}
+    <h2>Смена пароля</h2>
+    <label>Ваш текущий пароль:</label>
+    <input type="text" name="old_password" required><br><br>
+
+    <label>Новый пароль:</label>
+    <input type="text" name="new_password" required><br><br>
+
+    <button type="submit">Изменить</button>
+    </form>
+    <form action="/users/change_avatar/" method="POST">
+    {% csrf_token %}
+    <h2>Смена аватара</h2>
+
+    <label>Пароль:</label>
+    <input type="password" name="password" required><br><br>
+
+    <label>Новый аватар:</label>
+    <input type="file" name="new_avatar" accept="image/*" required><br><br>
+
+    <button type="submit">Изменить</button>
+    </form>
+</body>
+</html>
