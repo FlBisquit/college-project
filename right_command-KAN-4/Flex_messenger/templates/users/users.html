@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>W-Chat</title>
+</head>
+<body>
+<div class="container">
+
+    <div class="user-info">
+        <p><strong>Пользователь:</strong> {{ user.login }}</p>
+        
+    </div>
+
+    
+
+    <form action="/users/profile/">
+        <h3>Профиль:<button>Профиль</button></h3>
+        {% csrf_token %}
+    </form>
+
+    <form action="/chats/create/" method="POST">
+        <h2>Создать чат</h2>
+        <p>
+            Название сервера:
+             <input name="chatName" type="text"><br>
+            Макс. кол-во участников:
+            <input name="max_chaters" type="number" min="2" max="12" value="12">
+        </p>
+        <input type="submit" value="Создать">
+        {% csrf_token %}
+    </form>
+
+    <h2>Доступные чаты</h2>
+    <ul>
+        {% for chat in chats %}
+        <li>
+            <div><strong>Название:</strong> {{ chat.chatName }}</div>
+            <div><strong>Номер:</strong> {{ chat.number }}</div>
+            <div><strong>Участников:</strong> ...</div>
+            <a class="join-btn" href="/chats/join/{{ chat.id }}/">Присоединиться</a>
+            {% if user.id == chat.owner.id %}
+            <a class="join-btn" href="/chats/delete/{{ chat.id }}/">Удалить</a>
+            {% endif %}
+        </li>
+        {% endfor %} 
+    </ul>
+</div>
+</body> 
+</html>
