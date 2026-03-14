@@ -1,5 +1,8 @@
-from django.db.models.signals import pre_save
+# Global
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from django.core.mail import send_mail
+# Local
 from .models import User
 
 
@@ -14,3 +17,16 @@ def delete_old_avatar(sender, instance, **kwargs):
             old.avatar.delete(save=False)
     except User.DoesNotExist:
         pass
+
+
+@receiver(post_save, sender=User)
+def send_welcome_email(sender, instance, created, **kwargs):
+    """Отправляет письмо при регистрации"""
+    if created:
+        send_mail(
+            subject='Добро пожаловать!',
+            message=f'Привет, {instance.username}! Спасибо за регистрацию.',
+            from_email=None,
+            recipient_list=[instance.email],
+            fail_silently=False,
+        )

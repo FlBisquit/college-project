@@ -6,16 +6,29 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сериализатор пользователя, чтение и обновление профиля"""
     is_online = serializers.SerializerMethodField()
+    online_status = serializers.SerializerMethodField()
+    last_seen_display = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'bio', 'date_birth', 'avatar', 'created_at', 'last_seen', 'is_online']
+        fields = ['id', 'username', 'email', 'bio', 'date_birth', 'avatar',
+                  'created_at', 'last_seen', 'is_online', 'online_status', 
+                  'last_seen_display', 'avatar_url']
         read_only_fields = ['id', 'username', 'created_at', 'last_seen']
 
     def get_is_online(self, obj):
         return obj.is_online
+
+    def get_online_status(self, obj):
+        return obj.online_status
+
+    def get_last_seen_display(self, obj):
+        return obj.last_seen_display
+
+    def get_avatar_url(self, obj):
+        return obj.avatar_url()
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -31,6 +44,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password', 'password2', 'date_birth', 'avatar']
         extra_kwargs = {
             'date_birth': {'required': False},
+            'avatar': {'required': False, 'allow_null': True},
         }
 
     def validate(self, data):
