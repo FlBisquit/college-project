@@ -52,7 +52,7 @@
 | Имя | Роль | Приложение | Часть | Ментор |
 | :--- | :--- | :--- | :--- | :--- |
 | Максим | Тимлид | chatting | Backend | Артём Х |
-| Даниил | Техлид | users | Backend + Frontend | Артём П |
+| Даниил | НИКТО | users | Backend + Frontend | Артём П |
 | Артём Х | Мидл | servers | Backend | — |
 | Артём П | Джун | voicechat | Backend + Frontend | — |
 

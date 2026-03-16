@@ -14,7 +14,7 @@ APPEND_SLASH = False
 
 ALLOWED_HOSTS = ['*']
 
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = "django-insecure-5)2bq*7$vs9zy8+wfao(x@8#_si6a@bxtu&e%@n#r@wv@%tdp4"
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 
