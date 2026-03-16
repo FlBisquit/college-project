@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
+
+/* ========== PROFILE CARD ========== */
+.profile-card {
+  max-width: 680px;
+}
+
+.profile-body {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin-top: 8px;
+}
+
+/* ========== AVATAR ========== */
+.profile-avatar-section {
+  flex-shrink: 0;
+}
+
+.profile-avatar-wrapper {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.profile-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2d2a5e, #7b4a6e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'Sora', sans-serif;
+}
+
+.profile-avatar-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(26, 34, 64, 0.82);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.profile-avatar-wrapper:hover .profile-avatar-overlay {
+  opacity: 1;
+}
+
+/* ========== FIELDS ========== */
+.profile-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1f36;
+  font-family: 'Sora', sans-serif;
+}
+
+.profile-bio {
+  background: #f2f4f7;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-family: 'Sora', sans-serif;
+  color: #1a1f36;
+  resize: none;
+  outline: none;
+  transition: box-shadow 0.2s;
+  line-height: 1.5;
+}
+
+.profile-bio::placeholder {
+  color: #b0b0c8;
+}
+
+.profile-bio:focus {
+  box-shadow: 0 0 0 2px #2d2a5e44;
+}
+
+.save-message {
+  background: #4caf50;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  text-align: center;
+}
+
+/* ========== ACTIONS ========== */
+.profile-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-logout {
+  background: none;
+  border: 1.5px solid #e0e0ee;
+  border-radius: 12px;
+  padding: 13px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  color: #6b6b8a;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-logout:hover {
+  border-color: #cc3333;
+  color: #cc3333;
+}
+
+/* ========== LOADING ========== */
+.profile-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 16px;
+  color: #9a9ab0;
+  background: linear-gradient(160deg, #c0593a 0%, #7b4a6e 40%, #2d2a5e 100%);
+}
