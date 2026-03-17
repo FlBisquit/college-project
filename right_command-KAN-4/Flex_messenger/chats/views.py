@@ -39,7 +39,7 @@ def create_chat(request):
             max_chaters=max_chaters,
             chatName=chatName
         )
-        return HttpResponseRedirect('/chats/')
+        return HttpResponseRedirect(f'/chatting/{chat.id}/')
     return HttpResponseRedirect('/')
 
 def delete_chat(request, chat_id):
@@ -53,7 +53,7 @@ def join_to_chat(request, chat_id):
         chat = Chat.objects.filter(id=chat_id).first()
         if chat:
             request.session['chat_id'] = chat_id
-            return HttpResponseRedirect('/chating/')
+            return HttpResponseRedirect(f'/chatting/{chat.id}/')
         return HttpResponseRedirect('/users/')
     return HttpResponseRedirect('/')
 

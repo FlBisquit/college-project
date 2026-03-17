@@ -36,4 +36,6 @@ urlpatterns = [
 
     
     path('chats/', include('chats.urls')),
+
+    path('chatting/', include('chatting.urls')),
 ]

@@ -1,8 +1,7 @@
-from django.db.models import Model,CharField,JSONField,IntegerField,ForeignKey,BooleanField,TextField,CASCADE
-
-
+from django.db.models import Model,CharField,JSONField,IntegerField,ForeignKey,BooleanField,TextField,CASCADE, UUIDField
 from uuid import uuid4
 from users.models import User
+
 def generate_uuid():
     return str(uuid4())
 def unic_number():
@@ -11,7 +10,7 @@ def unic_number():
 
 
 class Chat(Model):
-    id = CharField(max_length=36, default=generate_uuid, primary_key=True)
+    id = UUIDField(primary_key=True, default=uuid4, editable=False)
     number = CharField(max_length=6,default=unic_number)
     owner = ForeignKey(User,on_delete=CASCADE)
     max_chaters = IntegerField(default=12)

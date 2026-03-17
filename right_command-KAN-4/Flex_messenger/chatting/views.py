@@ -1,9 +1,6 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, JsonResponse
-from users.models import User
-from chats.models import Chat, ChatData
-import json
-from redis import Redis
 
-
-
+def room(request, room_name):
+    return render(request, 'chatting/room.html', {
+        'room_name': room_name
+    })
