@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from users.views import (
     users_auth, users_index, users_register, users_main,
@@ -22,3 +24,6 @@ urlpatterns = [
     path('list/', get_chat_list),
     path('chating/', chating_main)
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

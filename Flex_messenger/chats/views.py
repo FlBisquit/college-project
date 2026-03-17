@@ -22,7 +22,7 @@ def chating_main(request):
 def chat_main(request):
     if user := is_authorized(request):
         chats = Chat.objects.filter(done=False)
-
+        
         return render(request, 'users/users.html', context={
             'user': user,
             'chats': chats,
@@ -34,9 +34,11 @@ def create_chat(request):
     if user := is_authorized(request):
         max_chaters = request.POST.get('max_chaters') or 12
         chatName = request.POST.get('chatName')
+        chat_avatar = request.FILES.get('chat_avatar')
         chat = Chat.objects.create(
             owner = user,
             max_chaters=max_chaters,
+            chat_avatar = chat_avatar,
             chatName=chatName
         )
         return HttpResponseRedirect('/chats/')

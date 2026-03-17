@@ -31,7 +31,7 @@
 
     <button type="submit">Изменить</button>
     </form>
-    <form action="/users/change_avatar/" method="POST">
+    <form action="/users/change_avatar/" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <h2>Смена аватара</h2>
 

@@ -21,10 +21,7 @@ def user_profile(request):
 
         return render(request, "users/profile.html", context={
             "user": user,
-            "login": login,
             "hidden_password": hidden_password,
-            "email": email,
-            "avatar": avatar,
         })
     return HttpResponseRedirect('/')
     
@@ -73,7 +70,7 @@ def change_password(request):
 def change_avatar(request):
     if request.method == "POST":
         password = request.POST.get("password")
-        new_avatar = request.FILES['avatar']
+        new_avatar = request.FILES.get("new_avatar")
 
         user = User.objects.filter(password=password).first()
         if not user:
@@ -83,6 +80,8 @@ def change_avatar(request):
             return HttpResponseRedirect('/users/')
 
         user.avatar = new_avatar
+        print(user.avatar)
+        print(new_avatar)
         user.save()
 
         return HttpResponseRedirect("/users/")
