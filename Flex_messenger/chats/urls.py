@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -19,10 +19,9 @@ urlpatterns = [
     path('create/', create_chat),
     path('delete/<str:chat_id>/', delete_chat),
     path('join/<str:chat_id>/', join_to_chat),
-    path('', chat_main),
     path('get/<str:chat_id>/', get_chat),
     path('list/', get_chat_list),
-    path('chating/', chating_main)
+    path('chatting/',include('chatting.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,
