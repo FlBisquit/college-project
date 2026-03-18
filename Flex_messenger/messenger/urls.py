@@ -39,7 +39,7 @@ urlpatterns = [
     
     path('chats/', include('chats.urls')),
 
-    path('chatting/', include('chatting.urls'))
+    path('chatting/', include('chatting.urls', namespace='chatting')),
 ]
 
 if settings.DEBUG:

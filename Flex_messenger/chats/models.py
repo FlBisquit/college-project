@@ -1,4 +1,4 @@
-from django.db.models import Model,CharField,JSONField,IntegerField,ForeignKey,BooleanField,TextField,CASCADE, ImageField
+from django.db.models import Model,CharField,JSONField,IntegerField,ForeignKey,BooleanField,TextField,CASCADE, ImageField, ManyToManyField
 
 
 from uuid import uuid4
@@ -13,12 +13,15 @@ def unic_number():
 class Chat(Model):
     id = CharField(max_length=36, default=generate_uuid, primary_key=True)
     number = CharField(max_length=6,default=unic_number)
-    owner = ForeignKey(User,on_delete=CASCADE)
+    owner = ForeignKey(User, on_delete=CASCADE, related_name='owned_chats')
+    participants = ManyToManyField(User, blank=True, related_name='joined_chats')
     max_chaters = IntegerField(default=12)
     done = BooleanField(default=False)
     started = BooleanField(default=False)
     chatName = CharField(max_length=150, default='test_chat')
     chat_avatar = ImageField(upload_to='avatars/', default='avatars/def.jpg')
+    is_private = BooleanField(default=False)
+
 class ChatData(Model):
     owner = ForeignKey(Chat, on_delete=CASCADE)
     user = ForeignKey(User, on_delete=CASCADE)

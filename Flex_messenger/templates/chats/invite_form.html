@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=0, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Пригласить пользователя в чат "{{ chat.chatName }}"</h1>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" action="{% url 'chats:invite_to_chat' chat.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Имя пользователя (логин):</label>
+                <input type="text" id="username" name="username" required placeholder="Введите логин">
+            </div>
+            <button type="submit">Пригласить</button>
+        </form>
+
+        <a class="back-link" href="/chatting/room/{{ chat.id }}/">← Вернуться в чат</a>
+    </div>
+</body>
+</html>
