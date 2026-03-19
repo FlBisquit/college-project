@@ -53,7 +53,7 @@ def create_chat(request):
             is_private=is_private
         )
         chat.participants.add(user)
-        return HttpResponseRedirect('/users/')  # или можно на страницу чата: f'/chatting/room/{chat.id}/'
+        return HttpResponseRedirect('/users/') 
     return HttpResponseRedirect('/')
 
 

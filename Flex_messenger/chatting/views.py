@@ -10,7 +10,6 @@ def room(request, chat_id):
     
     chat = get_object_or_404(Chat, id=chat_id, done=False)
     
-    # Проверка доступа для приватного чата
     if chat.is_private and user not in chat.participants.all():
         messages.error(request, 'У вас нет доступа к этому чату')
         return redirect('/users/')
@@ -18,5 +17,5 @@ def room(request, chat_id):
     return render(request, 'chatting/room.html', {
         'chat': chat,
         'user': user,
-        'room_name': chat_id,  # добавляем для шаблона
+        'room_name': chat_id,  
     })
