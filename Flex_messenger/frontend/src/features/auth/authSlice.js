@@ -1,27 +1,34 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api/axios';
 
+// Вспомогательная функция для сохранения токенов
+const saveTokens = ({ access, refresh }) => {
+  localStorage.setItem('access_token', access);
+  localStorage.setItem('refresh_token', refresh);
+};
+
+// Вспомогательная функция для формирования FormData
+const toFormData = (data) => {
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      formData.append(key, value);
+    }
+  });
+  return formData;
+};
+
 export const register = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
-      const formData = new FormData();
-      Object.keys(userData).forEach(key => {
-        if (userData[key] !== undefined && userData[key] !== null && userData[key] !== '') {
-          formData.append(key, userData[key]);
-        }
+      const { data } = await api.post('/users/register/', toFormData(userData), {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      const response = await api.post('/users/register/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-
-      localStorage.setItem('access_token', response.data.tokens.access);
-      localStorage.setItem('refresh_token', response.data.tokens.refresh);
-
-      return response.data.user;
+      saveTokens(data.tokens);
+      return data.user;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
@@ -30,26 +37,28 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await api.post('/users/login/', credentials);
-
-      localStorage.setItem('access_token', response.data.tokens.access);
-      localStorage.setItem('refresh_token', response.data.tokens.refresh);
-
-      return response.data.user;
+      const { data } = await api.post('/users/login/', credentials);
+      saveTokens(data.tokens);
+      return data.user;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
 
+// getMe используется только при старте — не вызывать повторно если user уже загружен
 export const getMe = createAsyncThunk(
   'auth/getMe',
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
+    // Пропускаем запрос если пользователь уже в store
+    const { user } = getState().auth;
+    if (user) return user;
+
     try {
-      const response = await api.get('/users/profile/');
-      return response.data;
+      const { data } = await api.get('/users/profile/');
+      return data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
@@ -58,13 +67,13 @@ export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      const refreshToken = localStorage.getItem('refresh_token');
-      await api.post('/users/logout/', { refresh: refreshToken });
-      
-      localStorage.clear();
+      const refresh = localStorage.getItem('refresh_token');
+      await api.post('/users/logout/', { refresh });
     } catch (error) {
-      localStorage.clear();
+      // Всё равно разлогиниваем на клиенте
       return rejectWithValue(error.response?.data);
+    } finally {
+      localStorage.clear();
     }
   }
 );
@@ -73,23 +82,26 @@ export const updateProfile = createAsyncThunk(
   'auth/updateProfile',
   async (profileData, { rejectWithValue }) => {
     try {
-      const formData = new FormData();
-      Object.keys(profileData).forEach(key => {
-        if (profileData[key] !== undefined && profileData[key] !== null) {
-          formData.append(key, profileData[key]);
-        }
+      const { data } = await api.patch('/users/profile/', toFormData(profileData), {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      const response = await api.patch('/users/profile/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-
-      return response.data.user;
+      return data.user;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
+
+// Общие обработчики состояний загрузки
+const handlePending = (state) => {
+  state.isLoading = true;
+  state.error = null;
+};
+
+const handleRejected = (state, action) => {
+  state.isLoading = false;
+  state.error = action.payload;
+};
 
 const authSlice = createSlice({
   name: 'auth',
@@ -97,6 +109,7 @@ const authSlice = createSlice({
     user: null,
     isAuthenticated: !!localStorage.getItem('access_token'),
     isLoading: false,
+    initialized: false, 
     error: null,
   },
   reducers: {
@@ -106,56 +119,47 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(register.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(register.fulfilled, (state, action) => {
+      // register
+      .addCase(register.pending, handlePending)
+      .addCase(register.fulfilled, (state, { payload }) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload;
+        state.user = payload;
       })
-      .addCase(register.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
-      .addCase(login.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(login.fulfilled, (state, action) => {
+      .addCase(register.rejected, handleRejected)
+
+      // login
+      .addCase(login.pending, handlePending)
+      .addCase(login.fulfilled, (state, { payload }) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload;
+        state.user = payload;
       })
-      .addCase(login.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
-      .addCase(getMe.fulfilled, (state, action) => {
+      .addCase(login.rejected, handleRejected)
+
+      // getMe
+      .addCase(getMe.fulfilled, (state, { payload }) => {
         state.isAuthenticated = true;
-        state.user = action.payload;
+        state.user = payload;
       })
       .addCase(getMe.rejected, (state) => {
         state.isAuthenticated = false;
         state.user = null;
       })
+
+      // logout
       .addCase(logout.fulfilled, (state) => {
         state.isAuthenticated = false;
         state.user = null;
       })
-      .addCase(updateProfile.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(updateProfile.fulfilled, (state, action) => {
+
+      // updateProfile
+      .addCase(updateProfile.pending, handlePending)
+      .addCase(updateProfile.fulfilled, (state, { payload }) => {
         state.isLoading = false;
-        state.user = action.payload;
+        state.user = payload;
       })
-      .addCase(updateProfile.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      });
+      .addCase(updateProfile.rejected, handleRejected);
   },
 });
 

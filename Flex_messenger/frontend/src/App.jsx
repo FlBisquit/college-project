@@ -4,6 +4,7 @@ import Login from './features/auth/Login';
 import Register from './features/auth/Register';
 import Profile from './pages/Profile';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
+import NotFound from './pages/NotFound';
 import './styles/App.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
             </PrivateRoute>
           } 
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

@@ -3,13 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getMe, logout, updateProfile } from '../features/auth/authSlice';
 import Loader from '../components/Loader/Loader';
+import Header from '../components/Header/Header';
 import './Profile.css';
 
 const BASE_URL = 'http://127.0.0.1:8000';
 
 const getAvatarSrc = (user, preview) => {
   if (preview) return preview;
-  if (!user.avatar) return null;
+  if (!user.avatar) return `${BASE_URL}/static/images/default_avatar.png`;
   const url = user.avatar.startsWith('http') ? user.avatar : `${BASE_URL}${user.avatar}`;
   return `${url}?t=${Date.now()}`;
 };
@@ -17,7 +18,7 @@ const getAvatarSrc = (user, preview) => {
 function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const { user, loading } = useSelector((state) => state.auth);
   const fileInputRef = useRef(null);
 
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -26,13 +27,18 @@ function Profile() {
   const [formData, setFormData] = useState({ email: '', bio: '', date_birth: '' });
 
   useEffect(() => {
-    if (!user) dispatch(getMe());
-    else setFormData({
-      email: user.email || '',
-      bio: user.bio || '',
-      date_birth: user.date_birth || '',
-    });
-  }, [dispatch, user]);
+    if (!user && !loading) {
+      dispatch(getMe());
+    }
+    
+    if (user) {
+      setFormData({
+        email: user.email || '',
+        bio: user.bio || '',
+        date_birth: user.date_birth || '',
+      });
+    }
+  }, [dispatch, user, loading]);
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -71,6 +77,8 @@ function Profile() {
 
   return (
     <div className="auth-bg">
+      <Header />
+
       <div className="auth-card profile-card">
         <div className="profile-body">
 

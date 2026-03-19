@@ -1,0 +1,98 @@
+.main-header {
+  width: 100%;
+  height: 70px;
+  background: rgba(34, 38, 41, 0.95); /* Ваш основной цвет с прозрачностью */
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+.nav-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 20px;
+  transition: opacity 0.2s;
+}
+
+.logo-section:hover { opacity: 0.8; }
+.logo-section img { width: 32px; height: 32px; filter: brightness(0) invert(1); }
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-link {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 15px;
+  transition: color 0.2s;
+}
+
+.nav-link:hover { color: var(--text); }
+
+.btn-primary-sm {
+  background: var(--accent);
+  color: var(--accent-text);
+  padding: 8px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary-sm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(134, 194, 49, 0.2);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-left: 1px solid var(--border);
+  padding-left: 20px;
+}
+
+.user-name {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.btn-logout:hover {
+  background: #f44336;
+  border-color: #f44336;
+}
