@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getMe, logout, updateProfile } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { getMe, logout, updateProfile } from '../features/auth/authSlice';
+import Loader from '../components/Loader/Loader';
 import './Profile.css';
 
 const BASE_URL = 'http://127.0.0.1:8000';
@@ -22,11 +23,7 @@ function Profile() {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
   const [saveMessage, setSaveMessage] = useState('');
-  const [formData, setFormData] = useState({
-    email: '',
-    bio: '',
-    date_birth: '',
-  });
+  const [formData, setFormData] = useState({ email: '', bio: '', date_birth: '' });
 
   useEffect(() => {
     if (!user) dispatch(getMe());
@@ -68,7 +65,9 @@ function Profile() {
     navigate('/login');
   };
 
-  if (!user) return <div className="profile-loading">Loading...</div>;
+  if (!user) return <Loader />;
+
+  const avatarSrc = getAvatarSrc(user, avatarPreview);
 
   return (
     <div className="auth-bg">
@@ -78,8 +77,8 @@ function Profile() {
           {/* Avatar */}
           <div className="profile-avatar-section">
             <div className="profile-avatar-wrapper" onClick={() => fileInputRef.current?.click()}>
-              {getAvatarSrc(user, avatarPreview) ? (
-                <img src={getAvatarSrc(user, avatarPreview)} alt="avatar" className="profile-avatar-img" />
+              {avatarSrc ? (
+                <img src={avatarSrc} alt="avatar" className="profile-avatar-img" />
               ) : (
                 <div className="profile-avatar-placeholder">
                   {user.username?.[0]?.toUpperCase()}

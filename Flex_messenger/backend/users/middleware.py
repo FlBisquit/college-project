@@ -1,6 +1,7 @@
 from django.utils import timezone
 
 class UpdateLastSeenMiddleware:
+    """Обновление статуса пользователя, отоброжения для админки (онлайн/офлайн)"""
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -10,3 +11,4 @@ class UpdateLastSeenMiddleware:
                 last_seen=timezone.now()
             )
         return self.get_response(request)
+    
