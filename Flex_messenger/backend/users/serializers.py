@@ -3,6 +3,7 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from .models import User
+from typing import cast
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -68,6 +69,7 @@ class UserAuthSerializer(serializers.Serializer):
             raise serializers.ValidationError("Неверный логин или пароль")
         if not user.is_active:
             raise serializers.ValidationError("Аккаунт заблокирован")
+        user = cast(User, user)
         if user.is_banned:
             raise serializers.ValidationError("Аккаунт забанен")
         data['user'] = user

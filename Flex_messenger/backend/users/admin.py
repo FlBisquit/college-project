@@ -3,7 +3,6 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
 from .models import User
 
-
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     list_display = [
@@ -16,20 +15,20 @@ class CustomUserAdmin(UserAdmin):
     ordering = ['-created_at']
     readonly_fields = ['id', 'created_at', 'last_seen']
 
-    fieldsets = UserAdmin.fieldsets + (
+    fieldsets = list(UserAdmin.fieldsets) + [
         ('Дополнительно', {
             'fields': ('date_birth', 'avatar', 'bio', 'is_banned')
         }),
         ('Активность', {
             'fields': ('last_seen',)
         }),
-    )
+    ]
 
-    add_fieldsets = UserAdmin.add_fieldsets + (
+    add_fieldsets = list(UserAdmin.add_fieldsets) + [
         ('Дополнительно', {
             'fields': ('email', 'date_birth', 'avatar')
         }),
-    )
+    ]
 
     def online_badge(self, obj):
         """Цветной индикатор онлайн-статуса"""

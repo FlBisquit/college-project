@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { register } from './authSlice';
+import VerifyEmailModal from '../../components/VerifyEmailModal/VerifyEmailModal';
 import logo from '../../assets/images/logo.png';
 import '../../styles/Auth.css';
 
@@ -22,12 +23,6 @@ const icons = {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <rect x="3" y="11" width="18" height="11" rx="2"/>
       <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-    </svg>
-  ),
-  calendar: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="4" width="18" height="18" rx="2"/>
-      <path d="M16 2v4M8 2v4M3 10h18"/>
     </svg>
   ),
   eyeOff: (
@@ -73,6 +68,10 @@ function Register() {
     username: '', email: '', password: '', password2: '', date_birth: '', avatar: null,
   });
 
+  // userId для передачи в модалку после регистрации
+  const [userId, setUserId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -80,7 +79,15 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await dispatch(register(formData));
-    if (!result.error) navigate('/');
+    if (!result.error) {
+      setUserId(result.payload.id); // user_id из ответа бэкенда
+      setShowModal(true);
+    }
+  };
+
+  const handleVerified = () => {
+    setShowModal(false);
+    navigate('/');
   };
 
   return (
@@ -135,6 +142,14 @@ function Register() {
           Already have an account? <Link to="/login">Login</Link>
         </p>
       </div>
+
+      {showModal && (
+        <VerifyEmailModal
+          userId={userId}
+          email={formData.email}
+          onVerified={handleVerified}
+        />
+      )}
     </div>
   );
 }

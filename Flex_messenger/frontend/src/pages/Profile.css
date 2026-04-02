@@ -44,8 +44,8 @@
   justify-content: center;
   font-size: 48px;
   font-weight: 700;
-  color: #fff;
-  font-family: 'Sora', sans-serif;
+  color: var(--text);
+  font-family: var(--font);
 }
 
 .profile-avatar-overlay {
@@ -54,10 +54,10 @@
   left: 0;
   right: 0;
   background: rgba(26, 34, 64, 0.82);
-  color: #fff;
+  color: var(--text);
   font-size: 13px;
   font-weight: 600;
-  font-family: 'Sora', sans-serif;
+  font-family: var(--font);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,40 +88,40 @@
 .profile-label {
   font-size: 13px;
   font-weight: 600;
-  color: #1a1f36;
-  font-family: 'Sora', sans-serif;
+  color: var(--muted);
+  font-family: var(--font);
 }
 
 .profile-bio {
-  background: #f2f4f7;
-  border: none;
+  background: var(--input);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 14px 16px;
   font-size: 15px;
-  font-family: 'Sora', sans-serif;
-  color: #1a1f36;
+  font-family: var(--font);
+  color: var(--text);
   resize: none;
   outline: none;
-  transition: box-shadow 0.2s;
+  transition: border-color 0.2s;
   line-height: 1.5;
 }
 
 .profile-bio::placeholder {
-  color: #b0b0c8;
+  color: var(--muted);
 }
 
 .profile-bio:focus {
-  box-shadow: 0 0 0 2px #2d2a5e44;
+  border-color: var(--border-focus);
 }
 
 .save-message {
-  background: #4caf50;
-  color: white;
+  background: var(--accent);
+  color: var(--accent-text);
   padding: 10px 16px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  font-family: 'Sora', sans-serif;
+  font-family: var(--font);
   text-align: center;
 }
 
@@ -134,20 +134,20 @@
 
 .btn-logout {
   background: none;
-  border: 1.5px solid #e0e0ee;
+  border: 1.5px solid var(--border);
   border-radius: 12px;
   padding: 13px 24px;
   font-size: 14px;
   font-weight: 600;
-  font-family: 'Sora', sans-serif;
-  color: #6b6b8a;
+  font-family: var(--font);
+  color: var(--muted);
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
 }
 
 .btn-logout:hover {
-  border-color: #cc3333;
-  color: #cc3333;
+  border-color: var(--error);
+  color: var(--error);
 }
 
 /* ========== LOADING ========== */
@@ -156,8 +156,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Sora', sans-serif;
+  font-family: var(--font);
   font-size: 16px;
-  color: #9a9ab0;
-  background: linear-gradient(160deg, #c0593a 0%, #7b4a6e 40%, #2d2a5e 100%);
+  color: var(--muted);
+  background: var(--bg);
 }

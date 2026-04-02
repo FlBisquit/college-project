@@ -1,5 +1,8 @@
-from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-from .models import User
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
+from .models import User, EmailVerification
+import random
+from django.utils import timezone
 
 
 class AuthService:
@@ -16,10 +19,10 @@ class AuthService:
     def logout(refresh_token: str) -> bool:
         """Добавляет refresh токен в blacklist. Возвращает False если токен невалидный"""
         try:
-            token = RefreshToken(refresh_token)
+            token = RefreshToken(refresh_token)  # type: ignore
             token.blacklist()
             return True
-        except (TokenError, Exception):
+        except TokenError:
             return False
 
 
@@ -47,3 +50,39 @@ class UserService:
         serializer = UserSerializer(request.user, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         return UserService.update(request.user, serializer.validated_data)
+    
+class VerificationService:
+
+    @staticmethod
+    def generate_code() -> str:
+        return str(random.randint(100000, 999999))
+
+    @staticmethod
+    def create_or_update(user) -> str:
+        """Создаёт или обновляет код верификации, возвращает код"""
+        code = VerificationService.generate_code()
+        EmailVerification.objects.update_or_create(
+            user=user,
+            defaults={'code': code, 'created_at': timezone.now()}
+        )
+        return code
+
+    @staticmethod
+    def verify(user_id: int, code: str) -> tuple[bool, str]:
+        """Проверяет код. Возвращает (успех, сообщение об ошибке)"""
+        try:
+            verification = EmailVerification.objects.get(user_id=user_id)
+        except EmailVerification.DoesNotExist:
+            return False, 'Код не найден'
+
+        if verification.is_expired():
+            verification.delete()
+            return False, 'Код истёк'
+
+        if verification.code != code:
+            return False, 'Неверный код'
+
+        verification.user.is_verified = True
+        verification.user.save()
+        verification.delete()
+        return True, ''

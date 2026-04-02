@@ -3,8 +3,8 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 # Local
-from .models import User
-
+from .models import User, EmailVerification
+from .services import VerificationService
 
 @receiver(pre_save, sender=User)
 def delete_old_avatar(sender, instance, **kwargs):
@@ -18,14 +18,18 @@ def delete_old_avatar(sender, instance, **kwargs):
     except User.DoesNotExist:
         pass
 
-
 @receiver(post_save, sender=User)
 def send_welcome_email(sender, instance, created, **kwargs):
-    """Отправляет письмо при регистрации"""
     if created:
+        if instance.is_superuser:
+            instance.is_verified = True
+            instance.save(update_fields=['is_verified'])
+            return
+
+        code = VerificationService.create_or_update(instance)
         send_mail(
-            subject='Добро пожаловать!',
-            message=f'Привет, {instance.username}! Спасибо за регистрацию.',
+            subject='Подтверждение регистрации — Flex Messenger',
+            message=f'Привет, {instance.username}!\n\nТвой код подтверждения: {code}\n\nКод действителен 10 минут.',
             from_email=None,
             recipient_list=[instance.email],
             fail_silently=False,

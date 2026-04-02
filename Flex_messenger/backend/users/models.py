@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone as tz
+import random
 
 def avatar_upload_path(instance, filename):
     """Функция обработки названий аватаров пользователей (под их названия логина)"""
@@ -17,6 +18,7 @@ class User(AbstractUser):
     last_seen = models.DateTimeField(null=True, blank=True)
     is_banned = models.BooleanField(default=False)
     timezone = models.CharField(max_length=50, default='UTC')
+    is_verified = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
@@ -64,3 +66,19 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+
+class EmailVerification(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verification')
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        return (tz.now() - self.created_at).seconds > 600  # 10 минут
+
+    @staticmethod
+    def generate_code():
+        return str(random.randint(100000, 999999))
+
+    class Meta:
+        verbose_name = 'Верификация email'
