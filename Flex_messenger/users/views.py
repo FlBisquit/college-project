@@ -119,8 +119,8 @@ def registrate(request):
         if password != password_test:
             return HttpResponse("Пароли не совпадают")
         
-        if password.istitle() == False:
-            return HttpResponse('Пароль не содержит заглавную букву')
+        if not any(c.isupper() for c in password):
+            return HttpResponse("Пароль должен содержать заглавную букву")
         try: validate_email(email)
         except ValidationError:
             return HttpResponse('Почта не коректна')

@@ -2,17 +2,27 @@ import json
 import base64
 import uuid
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.utils.timezone import now
+from .models import Chat, Message
 from asgiref.sync import sync_to_async
 from django.core.files.base import ContentFile
-from .models import Message
+
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f'chat_{self.room_name}'
         self.user = self.scope['user']
+
+        if not self.user.is_authenticated:
+            print("NO AUTH → CLOSE")
+            await self.close()
+            return
+
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
+        print("CONNECTED OK")
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
@@ -21,7 +31,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
             message_type = data.get('type', 'text')
             
-            if message_type == 'text    ':
+            if message_type == 'text':
                 message = data.get('message', '').strip()
                 if message:
                     await self.save_message(message)
@@ -32,7 +42,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             'message': message,
                             'author': self.user.username,
                             'message_type': 'text',
-                            'created_at': str(await self.get_current_time())
+                            'created_at': str(now())
                         }
                     )
             elif message_type == 'image':
@@ -48,7 +58,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             'file_name': file_name,
                             'author': self.user.username,
                             'message_type': 'image',
-                            'created_at': str(await self.get_current_time())
+                            'created_at': str(now())
                         }
                     )
         except json.JSONDecodeError:
@@ -72,33 +82,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'created_at': event['created_at']
             }))
 
-    @sync_to_async
-    def save_message(self, text):
-        from .models import Chat, Message
-        from django.contrib.auth.models import User
-        chat = Chat.objects.get(uuid=self.room_name)
-        Message.objects.create(
+    
+    async def save_message(self, text):
+        chat = await sync_to_async(Chat.objects.get)(id=self.room_name)
+        await sync_to_async(Message.objects.create)(
             chat=chat,
-            author=self.user,
+            author_id=self.user.id,
             text=text
         )
-
-    @sync_to_async
-    def save_image(self, image_data, file_name):
-        from chats.models import Chat
-        from django.contrib.auth.models import User
-        
-        chat = Chat.objects.get(uuid=self.room_name)
-        image_content = ContentFile(base64.b64decode(image_data), name=file_name)
-        message = Message.objects.create(
+    async def save_image(self, image_data, file_name):
+        chat = await sync_to_async(Chat.objects.get)(id=self.room_name)
+        image_content = ContentFile(
+            base64.b64decode(image_data),
+            name=file_name
+        )
+        message = await sync_to_async(Message.objects.create)(
             chat=chat,
-            author=self.user,
+            author_id=self.user.id,
             text=''
         )
-        message.image.save(file_name, image_content, save=True)
+        await sync_to_async(message.image.save)(
+            file_name,
+            image_content,
+            True
+        )
         return message
-
-    @sync_to_async
-    def get_current_time(self):
-        from django.utils import timezone
-        return timezone.now()

@@ -2,9 +2,9 @@ from django.db.models import (
     Model, CharField, IntegerField, EmailField, ImageField
 )
 from uuid import uuid4
+from django.contrib.auth.models import AbstractUser
 
-
-class User(Model):
+class User(AbstractUser):
     id = CharField(
         default=uuid4,
         primary_key=True,
