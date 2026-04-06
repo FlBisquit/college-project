@@ -70,7 +70,5 @@ class UserAuthSerializer(serializers.Serializer):
         if not user.is_active:
             raise serializers.ValidationError("Аккаунт заблокирован")
         user = cast(User, user)
-        if user.is_banned:
-            raise serializers.ValidationError("Аккаунт забанен")
         data['user'] = user
         return data

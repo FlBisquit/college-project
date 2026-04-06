@@ -3,10 +3,12 @@ from django.db import models
 from django.utils import timezone as tz
 import random
 
+
 def avatar_upload_path(instance, filename):
     """Функция обработки названий аватаров пользователей (под их названия логина)"""
     ext = filename.split('.')[-1]
     return f'avatars/{instance.username}.{ext}'
+
 
 class User(AbstractUser):
     """Кастомная модель пользователя"""
@@ -16,7 +18,6 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to=avatar_upload_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_seen = models.DateTimeField(null=True, blank=True)
-    is_banned = models.BooleanField(default=False)
     timezone = models.CharField(max_length=50, default='UTC')
     is_verified = models.BooleanField(default=False)
 
