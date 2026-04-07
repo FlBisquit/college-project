@@ -32,9 +32,16 @@ def on_user_saved(sender, instance, created, **kwargs):
         if instance.is_superuser:
             instance.is_verified = True
             instance.save(update_fields=['is_verified'])
+            
+            send_html_email(
+                subject='Добро пожаловать в Flex Messenger! 🎉',
+                template='users/email_welcome.html',
+                context={'username': instance.username},
+                to_email=instance.email,
+            )
             return
 
-        # если обычный пользователь отправляем код верификации
+        # Если обычный пользователь — отправляем код верификации
         from .services import VerificationService
         code = VerificationService.create_or_update(instance)
 
@@ -46,7 +53,6 @@ def on_user_saved(sender, instance, created, **kwargs):
         )
 
     else:
-        # Пользователь только что подтвердил email — отправляем приветствие
         if _just_verified(instance):
             send_html_email(
                 subject='Добро пожаловать в Flex Messenger! 🎉',
@@ -63,3 +69,15 @@ def _just_verified(instance):
         return not old.is_verified and instance.is_verified
     except User.DoesNotExist:
         return False
+
+# если пользователь не подтвердил почту в течение 10 минут после регистрации, удаляем его
+@receiver(post_save, sender=User)
+def delete_unverified_user(sender, instance, created, **kwargs):
+    if created and not instance.is_verified:
+        from .models import EmailVerification
+        try:
+            verification = EmailVerification.objects.get(user=instance)
+            if verification.is_expired():
+                instance.delete()
+        except EmailVerification.DoesNotExist:
+            pass
