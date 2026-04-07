@@ -1,92 +1,115 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>комната: {{ room_name }}</title>
-    <style>
-        #chat-log { height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
-        .message { margin-bottom: 10px; }
-        .image-message img { max-width: 300px; max-height: 300px; }
-    </style>
+<title>комната: {{ room_name }}</title>
+<style>
+#chat-log { height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
+.message { margin-bottom: 10px; }
+.image-message img { max-width: 300px; max-height: 300px; }
+</style>
 </head>
 <body>
-    <h1>комната: {{ room_name }}</h1>
-    <div id="chat-log"></div>
-    
-    <input id="chat-message-input" type="text" placeholder="Введите сообщение">
-    <button id="chat-message-submit">отправить</button>
-    <input type="file" id="file-input" accept="image/*" style="display:none">
-    <button onclick="document.getElementById('file-input').click()">выбрать изображение</button>
-    <img id="image-preview" style="max-width:200px; display:none; margin-top:10px">
+<h1>комната: {{ room_name }}</h1>
+<div id="chat-log"></div>
+<input id="chat-message-input" type="text" placeholder="введите сообщение">
+<button id="chat-message-submit">отправить</button>
+<input type="file" id="file-input" accept="image/*" style="display:none">
+<button onclick="document.getElementById('file-input').click()">выбрать изображение</button>
+<img id="image-preview" style="max-width:200px; display:none; margin-top:10px">
 
-    <script>
-    const roomName = "{{ room_name }}";
-    const chatLog = document.getElementById('chat-log');
-    const input = document.getElementById('chat-message-input');
-    const button = document.getElementById('chat-message-submit');
-    const fileInput = document.getElementById('file-input');
-    const imagePreview = document.getElementById('image-preview');
-    
-    let selectedImage = null;
-    
-    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
-    
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                selectedImage = {
-                    data: e.target.result.split(',')[1],
-                    name: file.name
-                };
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
+<script>
+const roomName = "{{ room_name }}"
+const chatLog = document.getElementById('chat-log')
+const input = document.getElementById('chat-message-input')
+const button = document.getElementById('chat-message-submit')
+const fileInput = document.getElementById('file-input')
+const imagePreview = document.getElementById('image-preview')
+let selectedImage = null
+
+// старые сообщения из базы
+{% for m in messages %}
+const oldMsg{{ forloop.counter }} = document.createElement('div')
+oldMsg{{ forloop.counter }}.className = 'message'
+{% if m.image %}
+    oldMsg{{ forloop.counter }}.classList.add('image-message')
+    oldMsg{{ forloop.counter }}.innerHTML = `{{ m.author.username }}<br><img src="{{ m.image.url }}">`
+{% else %}
+    oldMsg{{ forloop.counter }}.textContent = "{{ m.author.username }}: {{ m.text|escapejs }}"
+{% endif %}
+chatLog.appendChild(oldMsg{{ forloop.counter }})
+{% endfor %}
+
+chatLog.scrollTop = chatLog.scrollHeight
+
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+const chatSocket = new WebSocket(protocol + '//' + window.location.host + '/ws/chat/' + roomName + '/')
+
+fileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0]
+    if (file) {
+        const reader = new FileReader()
+        reader.onload = function(e) {
+            selectedImage = {
+                data: e.target.result.split(',')[1],
+                name: file.name,
+                mime: file.type
+            }
+            imagePreview.src = e.target.result
+            imagePreview.style.display = 'block'
         }
-    });
-    
-    button.onclick = function() {
-        if (selectedImage) {
-            chatSocket.send(JSON.stringify({
-                'type': 'image',
-                'image_data': selectedImage.data,
-                'file_name': selectedImage.name
-            }));
-            selectedImage = null;
-            imagePreview.style.display = 'none';
-            fileInput.value = '';
-        } else if (input.value.trim()) {
-            chatSocket.send(JSON.stringify({
-                'type': 'text',
-                'message': input.value.trim()
-            }));
-            input.value = '';
-        }
-    };
-    
-    chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        const msgElem = document.createElement('div');
-        msgElem.className = 'message';
-        
-        if (data.type === 'text') {
-            msgElem.textContent = `${data.author}: ${data.message}`;
-        } else if (data.type === 'image') {
-            msgElem.className += ' image-message';
-            const img = document.createElement('img');
-            msgElem.textContent = `${data.author}`
-            img.src = 'data:image/png;base64,' + data.image_data;
-            msgElem.appendChild(img);
-        }
-        
-        chatLog.appendChild(msgElem);
-        chatLog.scrollTop = chatLog.scrollHeight;
-    };
-    
-    input.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') button.click();
-    });
-    </script>
+        reader.readAsDataURL(file)
+    }
+})
+
+button.onclick = function() {
+    if (selectedImage) {
+        chatSocket.send(JSON.stringify({
+            'type': 'image',
+            'image_data': selectedImage.data,
+            'file_name': selectedImage.name,
+            'mime': selectedImage.mime
+        }))
+        selectedImage = null
+        imagePreview.style.display = 'none'
+        fileInput.value = ''
+    } else if (input.value.trim()) {
+        chatSocket.send(JSON.stringify({
+            'type': 'text',
+            'message': input.value.trim()
+        }))
+        input.value = ''
+    }
+}
+
+chatSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data)
+    const msgElem = document.createElement('div')
+    msgElem.className = 'message'
+    if (data.type === 'text') {
+        msgElem.textContent = data.author + ': ' + data.message
+    } else if (data.type === 'image') {
+        msgElem.className += ' image-message'
+        const author = document.createElement('div')
+        author.textContent = data.author + ':'
+        const img = document.createElement('img')
+        img.src = 'data:' + (data.mime || 'image/png') + ';base64,' + data.image_data
+        msgElem.appendChild(author)
+        msgElem.appendChild(img)
+    }
+    chatLog.appendChild(msgElem)
+    chatLog.scrollTop = chatLog.scrollHeight
+}
+
+chatSocket.onclose = function() {
+    const notice = document.createElement('div')
+    notice.textContent = 'соединение потеряно'
+    notice.style.color = 'red'
+    chatLog.appendChild(notice)
+}
+
+input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') button.click()
+})
+</script>
 </body>
 </html>
