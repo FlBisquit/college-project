@@ -3,9 +3,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from users.views import (
-    users_auth, users_index, users_register, users_main,get_user_by_id, registrate,authorize,is_authorized,change_user,change_name,user_profile, change_avatar,change_password
-)
+from users.views import (users_auth,users_index,registrate,users_main,get_user_by_id,change_user,change_name,user_profile,change_avatar,change_password)
 
 app_name = 'users'
 # , name='login'
@@ -15,8 +13,7 @@ urlpatterns = [
 
     
     path('register/', registrate),
-    path('authorize/', authorize),
-    path('is_autharized/',is_authorized),
+    path('authorize/', users_auth),
     path('', users_main),
     path('auth/', users_auth),
     path('change/',change_user),

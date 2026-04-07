@@ -71,10 +71,11 @@
         msgElem.className = 'message';
         
         if (data.type === 'text') {
-            msgElem.textContent = data.message;
+            msgElem.textContent = `${data.author}: ${data.message}`;
         } else if (data.type === 'image') {
             msgElem.className += ' image-message';
             const img = document.createElement('img');
+            msgElem.textContent = `${data.author}`
             img.src = 'data:image/png;base64,' + data.image_data;
             msgElem.appendChild(img);
         }

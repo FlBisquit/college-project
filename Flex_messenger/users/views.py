@@ -1,106 +1,79 @@
-from django.shortcuts import render,HttpResponseRedirect
-from .models import User
-from chats.models import Chat
+from django.shortcuts import render, HttpResponseRedirect
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from .models import User
+from chats.models import Chat
 
 def user_profile(request):
-    if user := is_authorized(request):
-        user = is_authorized(request)
-        
-        if not user:
-            return HttpResponseRedirect("/")
-        
-        login = user.login
-        avatar = user.avatar
-        hidden_password = "*" * len(user.password)
-        print(avatar)
-        email = user.email 
-
-
-        return render(request, "users/profile.html", context={
-            "user": user,
-            "hidden_password": hidden_password,
-        })
-    return HttpResponseRedirect('/')
-    
-
-
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/')
+    hidden_password = '*' * 8
+    return render(request, 'users/profile.html', context={
+        'user': request.user,
+        'hidden_password': hidden_password,
+    })
 
 def change_user(request):
-    
     return render(request, 'users/change.html')
 
 def change_name(request):
-    if request.method == "POST":
-        old_login = request.POST.get("old_login")
-        password = request.POST.get("password")
-        new_login = request.POST.get("new_login")
-
-        user = User.objects.filter(login=old_login, password=password).first()
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect('/')
+        password = request.POST.get('password')
+        new_login = request.POST.get('new_login')
+        user = authenticate(request, username=request.user.username, password=password)
         if not user:
-            return HttpResponse("Неверный ник или пароль")
-
-        if User.objects.filter(login=new_login).exists():
-            return HttpResponseRedirect('/users/')
-
-        user.login = new_login
+            return HttpResponse('неверный пароль')
+        if User.objects.filter(username=new_login).exists():
+            return HttpResponse('такой ник уже занят')
+        user.username = new_login
         user.save()
+        return HttpResponseRedirect('/users/')
 
-        return HttpResponseRedirect("/users/")
-    
 def change_password(request):
-    if request.method == "POST":
-        old_password = request.POST.get("old_password")
-        new_password = request.POST.get("new_password")
-
-        user = User.objects.filter(password=old_password).first()
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect('/')
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        user = authenticate(request, username=request.user.username, password=old_password)
         if not user:
-            return HttpResponse("Неверный пароль")
-
-        if User.objects.filter(password=new_password).exists():
-            return HttpResponseRedirect('/users/')
-
-        user.password = new_password
+            return HttpResponse('неверный пароль')
+        user.set_password(new_password)
         user.save()
+        auth_login(request, user)
 
-        return HttpResponseRedirect("/users/")
+        return HttpResponseRedirect('/users/')
 
 def change_avatar(request):
-    if request.method == "POST":
-        password = request.POST.get("password")
-        new_avatar = request.FILES.get("new_avatar")
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect('/')
 
-        user = User.objects.filter(password=password).first()
-        if not user:
-            return HttpResponse("Неверный пароль")
+        new_avatar = request.FILES.get('new_avatar')
+        if not new_avatar:
+            return HttpResponse('файл не выбран')
 
-        if User.objects.filter(avatar=new_avatar).exists():
-            return HttpResponseRedirect('/users/')
+        request.user.avatar = new_avatar
+        request.user.save()
 
-        user.avatar = new_avatar
-        print(user.avatar)
-        print(new_avatar)
-        user.save()
-
-        return HttpResponseRedirect("/users/")
-    
-    
+        return HttpResponseRedirect('/users/')
 
 def users_index(request):
-    
     return render(request, 'users/index.html')
 
 def users_main(request):
-    if user := is_authorized(request):
-        chats = Chat.objects.all()
-        return render(request, 'users/users.html', context={
-            'user': user,
-            'chats': chats,
-            
-        })
-    return HttpResponseRedirect('/')
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/')
+
+    chats = Chat.objects.all()
+    return render(request, 'users/users.html', context={
+        'user': request.user,
+        'chats': chats,
+    })
 
 def registrate(request):
     if request.method == 'POST':
@@ -108,67 +81,55 @@ def registrate(request):
         password = request.POST.get('password')
         password_test = request.POST.get('password2')
         email = request.POST.get('email')
-        avatar = request.FILES['avatar']
-
-        if User.objects.filter(login=login).exists():
-            return HttpResponse("Пользователь уже существует")
-
+        avatar = request.FILES.get('avatar')
+        if User.objects.filter(username=login).exists():
+            return HttpResponse('пользователь уже существует')
         if len(password) < 8:
-            return HttpResponse("Пароль слишком короткий")
-
+            return HttpResponse('пароль слишком короткий')
         if password != password_test:
-            return HttpResponse("Пароли не совпадают")
-        
+            return HttpResponse('пароли не совпадают')
         if not any(c.isupper() for c in password):
-            return HttpResponse("Пароль должен содержать заглавную букву")
-        try: validate_email(email)
+            return HttpResponse('пароль должен содержать заглавную букву')
+        try:
+            validate_email(email)
         except ValidationError:
-            return HttpResponse('Почта не коректна')
-            
+            return HttpResponse('почта некорректна')
 
-        user = User.objects.create(
-            login=login,
+        user = User.objects.create_user(
+            username=login,
             password=password,
-            email = email,
-            avatar = avatar,
+            email=email,
         )
+        if avatar:
+            user.avatar = avatar
+            user.save()
 
-        authorize(request, login, password)
+        auth_login(request, user)
         return HttpResponseRedirect('/users/')
     return render(request, 'users/index.html')
-            
-def authorize( request, login, password):
-        if user := User.objects.filter(
-            login=login,
-            password=password
-        ).first():
-            request.session['user_id'] = str(user.id)
-            request.session['login'] = user.login
-            return user
-        
-def is_authorized(request):
-        if user_id := request.session.get('user_id'):
-            return User.objects.get(id=user_id)
 
 def users_auth(request):
-    login = request.POST.get('login')
-    password =request.POST.get('password')
-    if authorize(request, login, password):
-        return HttpResponseRedirect('/users/')
+    if request.method == 'POST':
+        login = request.POST.get('login')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=login, password=password)
+        if user:
+            auth_login(request, user)
+            return HttpResponseRedirect('/users/')
+
     return HttpResponseRedirect('/')
 
-def users_register(request):
-    login = request.POST.get('login')
-    password = request.POST.get('password')
-    email = request.POST.get('email')
-    avatar = request.POST.get('avatar')
-
-    if registrate(request, login, password, email, avatar):
-        return HttpResponseRedirect('/users/')
+def users_logout(request):
+    auth_logout(request)
     return HttpResponseRedirect('/')
 
 def get_user_by_id(request, user_id):
     user = User.objects.filter(id=user_id).first()
     if user:
-        return JsonResponse({'result': user.login})
+        return JsonResponse({'result': user.username})
     return JsonResponse({'result': None})
+def is_authorized(request):
+    if request.user.is_authenticated:
+        return request.user
+    return None

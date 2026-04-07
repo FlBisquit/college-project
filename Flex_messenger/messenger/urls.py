@@ -21,8 +21,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from users.views import (
-    users_auth, users_index, users_register, users_main,
-    get_user_by_id, registrate,authorize,is_authorized,change_user
+    users_auth,users_index,registrate,users_main,get_user_by_id,change_user
 )
 from chats.views import (
     create_chat, delete_chat, join_to_chat, chat_main,

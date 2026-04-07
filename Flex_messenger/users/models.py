@@ -10,20 +10,4 @@ class User(AbstractUser):
         primary_key=True,
         max_length=36
     )
-    login = CharField(max_length=32)
-    password = CharField(max_length=32)
-    password_test = CharField(max_length=32,default="")
-    email = EmailField(max_length = 256)
     avatar = ImageField(upload_to='avatars/', default='avatars/def.jpg')
-
-
-
-
-
-   
-    
-
-    
-                
-        
-    
