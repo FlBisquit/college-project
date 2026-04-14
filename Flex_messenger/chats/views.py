@@ -1,158 +1,218 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
+from django.db import models
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
 from users.models import User
-from .models import Chat, ChatData
+from users.views import is_authorized
+
+from .models import Chat
+from .serializers import ChatSerializer
+
 import json
 from redis import Redis
-from users.views import is_authorized
-from django.db import models
-from django.contrib import messages
 
 r = Redis()
 
-def chating_main(request):
-    if user := is_authorized(request):
-        chats = Chat.objects.filter(
-            done=False
-        ).filter(
+
+class ChatListApiView(APIView):
+    def get(self, request):
+        user = is_authorized(request)
+        if not user:
+            return Response(
+                {'error': 'незарегистрирован'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        chats = Chat.objects.filter(done=False).filter(
             models.Q(is_private=False) | models.Q(participants=user)
         ).distinct()
-        return render(request, 'chats/chat.html', context={
-            'user': user,
-            'chats': chats,
-        })
-    return HttpResponseRedirect('/')
+
+        serializer = ChatSerializer(chats, many=True)
+        return Response(serializer.data)
 
 
-def chat_main(request):
-    if user := is_authorized(request):
-        chats = Chat.objects.filter(
-            done=False
-        ).filter(
-            models.Q(is_private=False) | models.Q(participants=user)
-        ).distinct()
-        return render(request, 'users/users.html', context={
-            'user': user,
-            'chats': chats,
-        })
-    return HttpResponseRedirect('/')
+class CreateChatApiView(APIView):
+    def post(self, request):
+        user = is_authorized(request)
+        if not user:
+            return Response(
+                {'error': 'незарегистрирован'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
+        serializer = ChatSerializer(data=request.data)
 
-def create_chat(request):
-    if user := is_authorized(request):
-        max_chaters = request.POST.get('max_chaters') or 12
-        chatName = request.POST.get('chatName')
-        chat_avatar = request.FILES.get('chat_avatar')
-        is_private = request.POST.get('is_private') == 'on'
-        
-        chat = Chat.objects.create(
-            owner=user,
-            max_chaters=max_chaters,
-            chat_avatar=chat_avatar,
-            chatName=chatName,
-            is_private=is_private
-        )
-        chat.participants.add(user)
-        return HttpResponseRedirect('/users/') 
-    return HttpResponseRedirect('/')
-
-
-def delete_chat(request, chat_id):
-    if user := is_authorized(request):
-        Chat.objects.filter(id=chat_id).delete()
-        return HttpResponseRedirect('/users/')
-    return HttpResponseRedirect('/')
-
-
-def join_to_chat(request, chat_id):
-    if user := is_authorized(request):
-        chat = Chat.objects.filter(id=chat_id).first()
-        if not chat:
-            messages.error(request, 'Чат не найден')
-            return HttpResponseRedirect('/users/')
-        
-        if chat.is_private and user not in chat.participants.all():
-            messages.error(request, 'У вас нет доступа к этому приватному чату')
-            return HttpResponseRedirect('/users/')
-
-        if not chat.is_private and user not in chat.participants.all():
+        if serializer.is_valid():
+            chat = serializer.save(owner=user)
             chat.participants.add(user)
-        
-        request.session['chat_id'] = chat_id
- 
-        return HttpResponseRedirect(f'/chatting/room/{chat.id}/')
-    return HttpResponseRedirect('/')
+            return Response(
+                ChatSerializer(chat).data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def invite_to_chat(request, chat_id):
-    if user := is_authorized(request):
+class DeleteChatAPIView(APIView):
+    def delete(self, request, chat_id):
+        user = is_authorized(request)
+        if not user:
+            return Response(
+                {'error': 'незарегистрирован'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
         chat = Chat.objects.filter(id=chat_id).first()
         if not chat:
-            messages.error(request, 'Чат не найден')
-            return HttpResponseRedirect('/users/')
+            return Response(
+                {'error': 'Чат не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         if chat.owner != user:
-            messages.error(request, 'Вы не владелец этого чата')
-           
-            return HttpResponseRedirect(f'/chatting/room/{chat.id}/')
-        
-        if request.method == 'POST':
-            username = request.POST.get('username')
-            try:
-                invited_user = User.objects.get(login=username)
-            except User.DoesNotExist:
-                messages.error(request, 'Пользователь не найден')
-                return HttpResponseRedirect(f'/chatting/room/{chat.id}/')
-            
-            if invited_user in chat.participants.all():
-                messages.warning(request, 'Пользователь уже в чате')
-            else:
-                chat.participants.add(invited_user)
-                messages.success(request, f'Пользователь {username} приглашён')
-            
-            return HttpResponseRedirect(f'/chatting/room/{chat.id}/')
+            return Response(
+                {'error': 'Нет доступа'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        return render(request, 'chats/invite_form.html', {'chat': chat})
-    return HttpResponseRedirect('/')
+        chat.delete()
+        return Response(
+            {'message': 'Чат удален'},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
-def get_chat(request, chat_id):
-    if chat := r.get(chat_id):
-        chat = json.loads(chat.decode())
-    else:
+class JoinToChatAPIView(APIView):
+    def post(self, request, chat_id):
+        user = is_authorized(request)
+        if not user:
+            return Response(
+                {'error': 'незарегистрирован'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
         chat = Chat.objects.filter(id=chat_id).first()
-        if chat:
-            r.set(chat_id, json.dumps({
-                "id": str(chat.id),
-                "number": chat.number,
-                "max_chaters": chat.max_chaters,
-            }))
-            chat = chat.data 
+        if not chat:
+            return Response(
+                {'error': 'Чат не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if chat.is_private and user not in chat.participants.all():
+            return Response(
+                {'error': 'Нет доступа к чату'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if user not in chat.participants.all():
+            chat.participants.add(user)
+
+        return Response(
+            {'message': 'Успешный вход в чат'},
+            status=status.HTTP_200_OK
+        )
+
+
+class InviteToChatAPIView(APIView):
+    def post(self, request, chat_id):
+        user = is_authorized(request)
+        if not user:
+            return Response(
+                {'error': 'незарегистрирован'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        chat = Chat.objects.filter(id=chat_id).first()
+        if not chat:
+            return Response(
+                {'error': 'Чат не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if chat.owner != user:
+            return Response(
+                {'error': 'Нет доступа к добавлению пользователей'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        username = request.data.get('username')
+
+        try:
+            invited_user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Пользователь не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if invited_user in chat.participants.all():
+            return Response(
+                {'warning': 'Пользователь уже в чате'},
+                status=status.HTTP_200_OK
+            )
+
+        chat.participants.add(invited_user)
+
+        return Response(
+            {'message': f'{username} приглашён'},
+            status=status.HTTP_200_OK
+        )
+
+
+class GetChatAPIView(APIView):
+    def get(self, request, chat_id):
+        chat_data = r.get(chat_id)
+
+        if chat_data:
+            chat = json.loads(chat_data.decode())
         else:
-            chat = None
-    if chat:
-        return JsonResponse({'result': chat})
-    return JsonResponse({'result': None})
+            chat_obj = Chat.objects.filter(id=chat_id).first()
+            if not chat_obj:
+                return Response(
+                    {'result': None},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            chat = {
+                "id": str(chat_obj.id),
+                "number": chat_obj.number,
+                "max_chaters": chat_obj.max_chaters,
+            }
+
+            r.set(chat_id, json.dumps(chat))
+
+        return Response({'result': chat}, status=status.HTTP_200_OK)
 
 
-def update_chat_data(request, chat_id):
-    data = request.POST.get('data') or {}
-    if chat := r.get(chat_id):
-        chat = json.loads(chat.decode())
-        chat.update(data)
-        r.set(chat_id, json.dumps(chat))
-    else:
-        chat = Chat.objects.filter(id=chat_id).first()
-        if chat:
-            updated_data = chat.data 
-            updated_data.update(data)
-            chat.data = updated_data
-            chat.save()
-            r.set(chat_id, json.dumps(chat.data))
-    return JsonResponse({'result': 'update success'})
+class UpdateChatDataAPIView(APIView):
+    def post(self, request, chat_id):
+        data = request.data.get('data', {})
 
+        chat_data = r.get(chat_id)
 
-def get_chat_list(request):
-    chats = Chat.objects.all()
-    result = [str(chat.id) for chat in chats]
-    return JsonResponse({'result': result})
+        if chat_data:
+            chat = json.loads(chat_data.decode())
+            chat.update(data)
+            r.set(chat_id, json.dumps(chat))
+            return Response({"result": chat}, status=status.HTTP_200_OK)
+
+        chat_obj = Chat.objects.filter(id=chat_id).first()
+        if not chat_obj:
+            return Response(
+                {'error': 'Чат не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        updated_data = chat_obj.data or {}
+        updated_data.update(data)
+
+        chat_obj.data = updated_data
+        chat_obj.save()
+
+        r.set(chat_id, json.dumps(updated_data))
+
+        return Response({"result": updated_data}, status=status.HTTP_200_OK)

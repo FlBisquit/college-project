@@ -6,8 +6,12 @@ from django.utils.timezone import now
 from .models import Chat, Message
 from asgiref.sync import sync_to_async
 from django.core.files.base import ContentFile
+<<<<<<< HEAD
 
 
+=======
+from .models import Message 
+>>>>>>> 4a27de3 (чтото)
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
