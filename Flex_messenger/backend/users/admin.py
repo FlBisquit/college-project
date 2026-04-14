@@ -35,6 +35,8 @@ class CustomUserAdmin(UserAdmin):
     def online_badge(self, obj):
         if obj.is_online:
             return format_html('<span style="color: {};">● {}</span>', 'green', 'Онлайн')
+        if obj.is_recently_online:
+            return format_html('<span style="color: {};">● {}</span>', 'orange', 'Недавно')
         return format_html('<span style="color: {};">● {}</span>', 'grey', 'Офлайн')
 
     online_badge.short_description = 'Статус'

@@ -33,20 +33,26 @@ class User(AbstractUser):
         return (tz.now() - self.last_seen).seconds < 60
 
     @property
+    def is_recently_online(self):
+        if not self.last_seen:
+            return False
+        return (tz.now() - self.last_seen).seconds < 300
+
+    @property
     def online_status(self):
         if self.is_online:
             return 'online'
         if not self.last_seen:
             return 'offline'
-        delta = tz.now() - self.last_seen
-        if delta.seconds < 60:
+        if self.is_recently_online:
             return 'recently'
         return 'offline'
 
     @property
     def last_seen_display(self):
+        # т.к Pylace ожидает еще None
         if not self.last_seen:
-            return 'Никогда'
+            return ''
         delta = tz.now() - self.last_seen
         if delta.seconds < 60:
             return 'Только что'
@@ -56,7 +62,7 @@ class User(AbstractUser):
             return f'{delta.seconds // 3600} ч. назад'
         if delta.days == 1:
             return 'Вчера'
-        return self.last_seen.strftime('%d.%m.%Y')
+        return self.last_seen.strftime('%d.%m.%Y в %H:%M')
 
     def avatar_url(self):
         if self.avatar:

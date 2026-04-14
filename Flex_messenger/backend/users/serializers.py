@@ -62,6 +62,7 @@ class UserAuthSerializer(serializers.Serializer):
     """Сериализатор для аутентификации пользователя"""
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    email = serializers.EmailField(read_only=True)
 
     def validate(self, data):
         user = authenticate(username=data['username'], password=data['password'])

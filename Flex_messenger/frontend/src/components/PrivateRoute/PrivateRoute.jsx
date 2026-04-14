@@ -16,7 +16,6 @@ function PrivateRoute({ children }) {
 
   // Проверяем аутентификацию и подтверждение email
   if (!isAuthenticated) return <Navigate to="/login" />;
-  if (!user?.is_verified) return <Navigate to="/register" />; // Отправляем обратно на регистрацию
 
   return children;
 }

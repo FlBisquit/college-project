@@ -6,6 +6,7 @@ const saveTokens = ({ access, refresh }) => {
   localStorage.setItem('refresh_token', refresh);
 };
 
+// Преобразует объект в FormData, пропуская пустые значения
 const toFormData = (data) => {
   const formData = new FormData();
   Object.entries(data).forEach(([key, value]) => {
