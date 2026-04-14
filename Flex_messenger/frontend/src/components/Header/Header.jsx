@@ -1,10 +1,23 @@
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { logout, getMe } from "../../features/auth/authSlice";
 import logo from "../../assets/images/logo.png";
 import "./Header.css";
 
 const Header = () => {
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (isAuthenticated && !user && !loading) {
+      dispatch(getMe());
+    }
+  }, [isAuthenticated, user, loading, dispatch]);
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
 
   return (
     <header className="main-header">
@@ -17,11 +30,8 @@ const Header = () => {
         <nav className="nav-actions">
           {isAuthenticated ? (
             <>
-              <Link to="/messenger" className="nav-link">Messages</Link>
-              <div className="user-profile">
-                <span className="user-name">{user?.username || "User"}</span>
-                <button className="btn-logout">Exit</button>
-              </div>
+              <Link to="/profile" className="nav-link">Profile</Link>
+              <button className="btn-logout" onClick={handleLogout}>Exit</button>
             </>
           ) : (
             <>

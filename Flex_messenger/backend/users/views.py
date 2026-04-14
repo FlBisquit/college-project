@@ -1,8 +1,20 @@
 from rest_framework import generics, viewsets, mixins, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
 from .serializers import UserSerializer, UserRegisterSerializer, UserAuthSerializer
 from .services import AuthService, UserService, VerificationService
+
+
+class IsVerified(BasePermission):
+    """
+    Проверяет, что пользователь подтвердил email
+    """
+    message = "Необходимо подтвердить email для доступа к этому ресурсу"
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return request.user.is_verified
 
 
 class RegisterView(generics.CreateAPIView):
@@ -74,7 +86,7 @@ class LogoutView(generics.GenericAPIView):
 
 class ProfileView(generics.RetrieveUpdateDestroyAPIView):
     """Просмотр, обновление и удаление профиля текущего пользователя"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsVerified]
     serializer_class = UserSerializer
 
     def get_object(self):
@@ -94,7 +106,7 @@ class ProfileView(generics.RetrieveUpdateDestroyAPIView):
 
 class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """Список всех пользователей и детали конкретного"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsVerified]
     serializer_class = UserSerializer
 
     def get_queryset(self):

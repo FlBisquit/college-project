@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import Loader from '../Loader/Loader';
 
 function PrivateRoute({ children }) {
-  const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
+  const { isAuthenticated, isLoading, user } = useSelector((state) => state.auth);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -13,7 +13,12 @@ function PrivateRoute({ children }) {
   }, []);
 
   if (!ready || isLoading) return <Loader />;
-  return isAuthenticated ? children : <Navigate to="/login" />;
+
+  // Проверяем аутентификацию и подтверждение email
+  if (!isAuthenticated) return <Navigate to="/login" />;
+  if (!user?.is_verified) return <Navigate to="/register" />; // Отправляем обратно на регистрацию
+
+  return children;
 }
 
 export default PrivateRoute;

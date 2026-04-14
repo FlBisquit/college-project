@@ -14,13 +14,13 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route 
-          path="/profile" 
+        <Route
+          path="/profile"
           element={
             <PrivateRoute>
               <Profile />
             </PrivateRoute>
-          } 
+          }
         />
         <Route path="*" element={<NotFound />} />
       </Routes>

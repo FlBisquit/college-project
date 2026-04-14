@@ -12,11 +12,19 @@ function Home() {
 
       <main className="home-content">
         {isAuthenticated ? (
-          <section className="welcome-back">
-            <h1>Welcome back!</h1>
-            <p>Ready to jump back into your conversations?</p>
-            <Link to="/messenger" className="btn-primary-large">Enter Messenger</Link>
-          </section>
+              <div className="auth-bg">
+                <div className="top-server-card">
+                    <div className="server-body">
+                      <h2>My servers</h2>
+                      <button className='btn'>+</button>
+                    </div>
+                </div>
+                <div className="main-server-card">
+                    <div className="server-body">
+                      <h2>Public servers</h2>
+                    </div>
+                </div>
+              </div>
         ) : (
           <>
             <section className="hero-section">
@@ -60,10 +68,6 @@ function Home() {
           </>
         )}
       </main>
-
-      <footer className="home-footer">
-        <p>© 2026 Flex Messenger · <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link></p>
-      </footer>
     </div>
   );
 }

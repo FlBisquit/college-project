@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
+
 :root {
   --bg:           #222629;
   --card:         #2c2f36;
@@ -8,7 +10,7 @@
   --accent:       #86C231;
   --accent-hover: #96d63e;
   --accent-text:  #1a1f0a;
-  --font:         'Inter', sans-serif; /* Более современный шрифт */
+  --font:         'Sora', sans-serif;
 }
 
 .home-bg {
@@ -168,19 +170,49 @@
 .feature-item h3 { margin-bottom: 12px; }
 .feature-item p { color: var(--muted); font-size: 14px; }
 
-/* ── Footer ── */
-.home-footer {
-  text-align: center;
-  padding: 40px;
-  border-top: 1px solid var(--border);
-  color: var(--muted);
-}
 
-.home-footer a { color: var(--text); text-decoration: none; margin: 0 10px; }
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-15px); }
+}
+
+/* ========== CARD ========== */
+.top-server-card {
+  width: 100%;
+  height: 200px;
+  background: #464a4f;
+  border-radius: 48px;
+  padding: 48px 24px;
+  margin-bottom: 25px;
+  color: rgb(255, 255, 255);
+}
+.main-server-card {
+  width: 100%;
+  height: 600px;
+  background: #464a4f;
+  border-radius: 48px;
+  padding: 48px 24px;
+  color: rgb(255, 255, 255);
+}
+
+.btn{
+    all: unset;
+    text-align: center;
+    border-radius: 50%;
+    background-color: #86c231;
+    width: 120px;
+    height: 120px;
+    color: black;
+    font-size: 80px;
+}
+
+/* ========== BODY ========== */
+.server-body {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin-top: 8px;
 }
 
 /* ── Адаптивность ── */

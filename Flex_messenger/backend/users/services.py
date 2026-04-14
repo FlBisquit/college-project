@@ -68,7 +68,7 @@ class VerificationService:
         return code
 
     @staticmethod
-    def verify(user_id: int, code: str) -> tuple[bool, str]:
+    def verify(user_id: str, code: str) -> tuple[bool, str]:
         """Проверяет код. Возвращает (успех, сообщение об ошибке)"""
         try:
             verification = EmailVerification.objects.get(user_id=user_id)

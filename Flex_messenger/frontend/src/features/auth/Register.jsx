@@ -62,13 +62,15 @@ const PasswordInput = ({ name, placeholder, value, onChange }) => {
 function Register() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, error } = useSelector((state) => state.auth);
+  const { isLoading, error } = useSelector(state => state.auth);
 
   const [formData, setFormData] = useState({
-    username: '', email: '', password: '', password2: '', date_birth: '', avatar: null,
+    username: '',
+    email: '',
+    password: '',
+    password2: '',
+    date_birth: '',
   });
-
-  // userId для передачи в модалку после регистрации
   const [userId, setUserId] = useState(null);
   const [showModal, setShowModal] = useState(false);
 

@@ -117,8 +117,8 @@
 .save-message {
   background: var(--accent);
   color: var(--accent-text);
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 13px 24px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
   font-family: var(--font);
@@ -128,14 +128,18 @@
 /* ========== ACTIONS ========== */
 .profile-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: right;
   align-items: center;
 }
-
+.btns-actions{
+  display: flex;
+  justify-content: space-between;
+  width: 406px;
+}
 .btn-logout {
   background: none;
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
+  border: 1.5px solid #841414;
+  border-radius: 8px;
   padding: 13px 24px;
   font-size: 14px;
   font-weight: 600;
@@ -143,11 +147,14 @@
   color: var(--muted);
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
+  background-color: #841414;
+  color: #000000;
 }
 
 .btn-logout:hover {
   border-color: var(--error);
   color: var(--error);
+  color: #000000;
 }
 
 /* ========== LOADING ========== */

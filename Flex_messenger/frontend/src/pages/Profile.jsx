@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getMe, logout, updateProfile } from '../features/auth/authSlice';
@@ -12,7 +12,7 @@ const getAvatarSrc = (user, preview) => {
   if (preview) return preview;
   if (!user.avatar) return `${BASE_URL}/static/images/default_avatar.png`;
   const url = user.avatar.startsWith('http') ? user.avatar : `${BASE_URL}${user.avatar}`;
-  return `${url}?t=${Date.now()}`;
+  return url;
 };
 
 function Profile() {
@@ -25,6 +25,8 @@ function Profile() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [saveMessage, setSaveMessage] = useState('');
   const [formData, setFormData] = useState({ email: '', bio: '', date_birth: '' });
+
+  const avatarSrc = useMemo(() => user ? getAvatarSrc(user, avatarPreview) : '', [user?.avatar, avatarPreview]);
 
   useEffect(() => {
     if (!user && !loading) {
@@ -72,8 +74,6 @@ function Profile() {
   };
 
   if (!user) return <Loader />;
-
-  const avatarSrc = getAvatarSrc(user, avatarPreview);
 
   return (
     <div className="auth-bg">
@@ -146,4 +146,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default memo(Profile);

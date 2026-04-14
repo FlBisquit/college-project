@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone as tz
 import random
+import uuid
 
 
 def avatar_upload_path(instance, filename):
@@ -12,6 +13,7 @@ def avatar_upload_path(instance, filename):
 
 class User(AbstractUser):
     """Кастомная модель пользователя"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     bio = models.TextField(max_length=500, blank=True, default='')
     date_birth = models.DateField(null=True, blank=True)
