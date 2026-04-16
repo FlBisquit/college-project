@@ -13,7 +13,7 @@
         
     </div>
 
-    <form action="/chats/create" method="POST">
+    <form action="/servers/create" method="POST">
         <h2>Создать игру</h2>
         <p>
             Макс. кол-во участников:
@@ -25,14 +25,14 @@
 
     <h2>Доступные игры</h2>
     <ul>
-        {% for chat in chats %}
+        {% for chat in servers %}
         <li>
             
             <div><strong>Номер:</strong> {{ chat.number }}</div>
             <div><strong>Участников:</strong> ...</div>
-            <a class="join-btn" href="/chats/join/{{ chat.id }}">Присоединиться</a>
+            <a class="join-btn" href="/servers/join/{{ chat.id }}">Присоединиться</a>
             {% if user.id == chat.owner.id %}
-            <a class="join-btn" href="/chats/delete/{{ chat.id }}">Удалить</a>
+            <a class="join-btn" href="/servers/delete/{{ chat.id }}">Удалить</a>
             {% endif %}
         </li>
         {% endfor %} 
