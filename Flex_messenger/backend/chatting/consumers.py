@@ -6,12 +6,7 @@ from django.utils.timezone import now
 from .models import Chat, Message
 from asgiref.sync import sync_to_async
 from django.core.files.base import ContentFile
-<<<<<<< HEAD
-
-
-=======
 from .models import Message 
->>>>>>> 4a27de3 (чтото)
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -19,14 +14,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.user = self.scope['user']
 
         if not self.user.is_authenticated:
-            print("NO AUTH → CLOSE")
+            print("already ауф")
             await self.close()
             return
 
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
-        print("CONNECTED OK")
+        print("ЕСТЬ КОНЕКТ")
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
