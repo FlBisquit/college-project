@@ -108,24 +108,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return message
     
 
-    # # chat commands
+    # chat commands
 
-    # async def command(command, args):
-    #     if command == "kick":
-    #         username = args
-    #         chat = await sync_to_async(Chat.objects.get)(id=self.room_name)
-    #         if self.scope["user"] != await sync_to_async(lambda: chat.owner)():
-    #             await self.send(text_data=json.dumps({
-    #                 "type": "error 503",
-    #                 "message": "Нужно быть владельцем чата чтобы использовать данную комманду"
-    #             }))
-    #             return
-    #         try:
-    #             user_to_kick = await sync_to_async(User.objects.get)(username=username)
-    #         except User.DoesNotExist:
-    #             await self.send(text_data=json.dumps({
-    #                 "type": "error", 
-    #                 "message": f"User {username} not found"
-    #             }))
-    #             return
-    #         await sync_to_async(chat.participants.remove)
+    async def command(command, args):
+        if command == "kick":
+            username = args
+            chat = await sync_to_async(Chat.objects.get)(id=self.room_name)
+            if self.scope["user"] != await sync_to_async(lambda: chat.owner)():
+                await self.send(text_data=json.dumps({
+                    "type": "error 503",
+                    "message": "Нужно быть владельцем чата чтобы использовать данную комманду"
+                }))
+                return
+            try:
+                user_to_kick = await sync_to_async(User.objects.get)(username=username)
+            except User.DoesNotExist:
+                await self.send(text_data=json.dumps({
+                    "type": "error", 
+                    "message": f"User {username} not found"
+                }))
+                return
+            await sync_to_async(chat.participants.remove)(user_to_kick)
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "user_kicked",
+                    "username": username,
+                }
+            )
