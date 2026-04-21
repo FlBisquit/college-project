@@ -6,7 +6,7 @@ from django.utils.timezone import now
 from .models import Chat, Message
 from asgiref.sync import sync_to_async
 from django.core.files.base import ContentFile
-from .models import Message 
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -106,3 +106,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
             True
         )
         return message
+    
+
+    # # chat commands
+
+    # async def command(command, args):
+    #     if command == "kick":
+    #         username = args
+    #         chat = await sync_to_async(Chat.objects.get)(id=self.room_name)
+    #         if self.scope["user"] != await sync_to_async(lambda: chat.owner)():
+    #             await self.send(text_data=json.dumps({
+    #                 "type": "error 503",
+    #                 "message": "Нужно быть владельцем чата чтобы использовать данную комманду"
+    #             }))
+    #             return
+    #         try:
+    #             user_to_kick = await sync_to_async(User.objects.get)(username=username)
+    #         except User.DoesNotExist:
+    #             await self.send(text_data=json.dumps({
+    #                 "type": "error", 
+    #                 "message": f"User {username} not found"
+    #             }))
+    #             return
+    #         await sync_to_async(chat.participants.remove)

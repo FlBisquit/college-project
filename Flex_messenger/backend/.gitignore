@@ -7,7 +7,7 @@ desktop.ini
 .idea/
 *.sw?
 .trash
-media/
+.media/
 
 # --- Python / Django ---
 venv/
