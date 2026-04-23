@@ -15,6 +15,7 @@ class Chat(Model):
     number = CharField(max_length=6,default=unic_number)
     owner = ForeignKey(User, on_delete=CASCADE, related_name='owned_servers')
     participants = ManyToManyField(User, blank=True, related_name='joined_servers')
+    ban_list = ManyToManyField(User, blank=True, related_name='banned_on_servers')
     max_chaters = IntegerField(default=12)
     done = BooleanField(default=False)
     started = BooleanField(default=False)

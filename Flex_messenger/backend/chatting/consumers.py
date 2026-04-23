@@ -13,6 +13,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_group_name = f'chat_{self.room_name}'
         self.user = self.scope['user']
 
+        chat = await sync_to_async(Chat.objects.get)(id=self.room_name)
+
         if not self.user.is_authenticated:
             print("already ауф")
             await self.close()

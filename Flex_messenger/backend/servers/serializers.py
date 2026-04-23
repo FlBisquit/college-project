@@ -4,7 +4,7 @@ from .models import Chat, ChatData
 class ChatSerializer(serializers.ModelSerializer):
     class Meta:
         model:Chat
-        fields = ['id','number','owner','participants','max_chaters','done','started','chatName','chat_avatar','is_private']
+        fields = ['id','number','owner','participants','max_chaters','done','started','chatName','chat_avatar','is_private', 'ban_list']
 
 class ChatDataSerializer(serializers.ModelSerializer):
     class Meta:
