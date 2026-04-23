@@ -41,6 +41,7 @@
  ┃ ┣ 📜package-lock.json
  ┃ ┣ 📜package.json
  ┃ ┗ 📜vite.config.js
+ ┣ 📂tests
  ┣ 🔧.gitignore
  ┣ 📑README.md
  ┗ 🖼️wahta.jpg
@@ -59,7 +60,7 @@
 
 | Часть | Технологии |
 | :--- | :--- |
-| Backend | Django, DRF, SimpleJWT, Channels, Redis, Celery |
+| Backend | Django, DRF, Csrf, Channels, Redis, Celery |
 | Frontend | React, Redux Toolkit, Vite |
 | БД | SQLite |
 | WebSocket | Django Channels + Redis |
@@ -115,7 +116,7 @@ redis-server
 
 **Celery**
 ```bash
-celery -A config worker -l info --pool=solo
+celery -A config worker --loglevel=info --pool=solo
 ```
 
 **Tests**

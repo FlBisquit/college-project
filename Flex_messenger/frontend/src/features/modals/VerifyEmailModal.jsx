@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { verifyEmail, resendCode } from '../../features/auth/authSlice';
+import { getMe } from '../../features/profile/profileSlice';
 import { closeModal } from './modalsSlice';
 import './VerifyEmailModal.css';
 
@@ -11,7 +12,9 @@ function VerifyEmailModal({ userId, email, onClose }) {
 
   const [code, setCode] = useState(() => localStorage.getItem('verifyCode') || '');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(
+    !userId || userId === 'None' ? 'Сессия истекла, пожалуйста, войдите в систему снова' : null
+  );
   const [resendMessage, setResendMessage] = useState('');
 
   const handleCodeChange = (e) => {
@@ -24,13 +27,15 @@ function VerifyEmailModal({ userId, email, onClose }) {
     setResendMessage('');
     const result = await dispatch(resendCode(userId));
     if (!result.error) {
-      setResendMessage(result.payload.message);
+      setResendMessage(result.payload?.message);
     } else {
       setResendMessage(result.payload?.message || 'Ошибка отправки');
     }
   };
 
   const handleSubmit = async () => {
+    if (error) return;
+
     if (code.length !== 6) {
       setError('Введите 6-значный код');
       return;
@@ -43,11 +48,13 @@ function VerifyEmailModal({ userId, email, onClose }) {
 
     setIsLoading(false);
 
-    if (!result.error) {
-      navigate('/');
+    if (verifyEmail.fulfilled.match(result)) {
+      localStorage.removeItem('verifyCode');
+      await dispatch(getMe());
       dispatch(closeModal());
+      navigate('/');
     } else {
-      setError(result.payload?.detail || 'Неверный код');
+      setError(result.payload?.message || result.payload?.detail || 'Неверный код');
     }
   };
 
@@ -77,15 +84,12 @@ function VerifyEmailModal({ userId, email, onClose }) {
         <button
           className="modal-btn"
           onClick={handleSubmit}
-          disabled={isLoading || code.length !== 6}
+          disabled={isLoading || code.length !== 6 || !!error}
         >
           {isLoading ? 'Проверяем...' : 'Подтвердить'}
         </button>
 
-        <button
-          className="modal-btn-secondary"
-          onClick={handleResend}
-        >
+        <button className="modal-btn-secondary" onClick={handleResend}>
           Отправить код повторно
         </button>
 

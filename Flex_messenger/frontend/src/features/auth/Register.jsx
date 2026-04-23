@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { register } from './authSlice';
 import { openModal } from '../../features/modals/modalsSlice';
 import logo from '../../assets/images/logo.png';
@@ -61,7 +61,6 @@ const PasswordInput = ({ name, placeholder, value, onChange }) => {
 
 function Register() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { isLoading, error } = useSelector(state => state.auth);
 
   const [formData, setFormData] = useState({
@@ -90,10 +89,6 @@ function Register() {
         }
       }));
     }
-  };
-
-  const handleVerified = () => {
-    navigate('/');
   };
 
   return (

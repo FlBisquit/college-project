@@ -18,10 +18,10 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
-      const { data } = await api.post('/users/register/', toFormData(userData), {
+      const { data } = await api.post('/users/auth/register/', toFormData(userData), {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      return data.user; // бэкенд должен вернуть user.id внутри user
+      return data; // возвращаем весь ответ
     } catch (error) {
       return rejectWithValue(error.response?.data);
     }
@@ -32,7 +32,7 @@ export const verifyEmail = createAsyncThunk(
   'auth/verifyEmail',
   async ({ user_id, code }, { rejectWithValue }) => {
     try {
-      const { data } = await api.post('/users/verify-email/', { user_id, code });
+      const { data } = await api.post('/users/auth/verify-email/', { user_id, code });
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data);
@@ -44,7 +44,7 @@ export const resendCode = createAsyncThunk(
   'auth/resendCode',
   async (userId, { rejectWithValue }) => {
     try {
-      const { data } = await api.post('/users/resend-code/', { user_id: userId });
+      const { data } = await api.post('/users/auth/resend-code/', { user_id: userId });
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data);
@@ -56,21 +56,18 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
-      const { data } = await api.post('/users/login/', credentials);
+      const { data } = await api.post('/users/auth/login/', credentials);
       // Очищаем старый профиль и загружаем новый
       dispatch({ type: 'profile/clearProfile' });
       dispatch(getMe());
       return data.user;
     } catch (error) {
       const errorData = error.response?.data;
-      console.log('Login error:', errorData);
       if (errorData?.detail === "Email не подтверждён") {
-        console.log('Opening verify modal for', errorData);
         dispatch(openModal({
           type: 'verifyEmail',
           data: { userId: errorData.user_id, email: errorData.email }
         }));
-        // Don't show error for verify case
         return rejectWithValue(null);
       }
       return rejectWithValue(errorData);
@@ -82,7 +79,7 @@ export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { dispatch, rejectWithValue }) => {
     try {
-      await api.post('/users/logout/');
+      await api.post('/users/auth/logout/');
       // Очищаем профиль при выходе
       dispatch({ type: 'profile/clearProfile' });
     } catch (error) {
@@ -104,7 +101,7 @@ const handleRejected = (state, action) => {
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    isAuthenticated: false,
+    isAuthenticated: localStorage.getItem('isAuthenticated') === 'true',
     isLoading: false,
     error: null,
   },
@@ -126,11 +123,13 @@ const authSlice = createSlice({
 
       // verifyEmail
       .addCase(verifyEmail.pending, handlePending)
-      .addCase(verifyEmail.fulfilled, (state) => {
+      .addCase(verifyEmail.fulfilled, (state, { payload }) => {
         state.isLoading = false;
+        state.isAuthenticated = true;
+        localStorage.setItem('isAuthenticated', 'true');
       })
       // close modal on verify email success
-      .addCase('modals/closeModal', (state) => {
+      .addCase('modals/closeModal', () => {
         // navigate in component
       })
       .addCase(verifyEmail.rejected, handleRejected)
@@ -147,20 +146,24 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state) => {
         state.isLoading = false;
         state.isAuthenticated = true;
+        localStorage.setItem('isAuthenticated', 'true');
       })
       .addCase(login.rejected, handleRejected)
 
       // logout
       .addCase(logout.fulfilled, (state) => {
         state.isAuthenticated = false;
+        localStorage.removeItem('isAuthenticated');
       })
 
       // profile getMe
       .addCase('profile/getMe/fulfilled', (state) => {
         state.isAuthenticated = true;
+        localStorage.setItem('isAuthenticated', 'true');
       })
       .addCase('profile/getMe/rejected', (state) => {
         state.isAuthenticated = false;
+        localStorage.removeItem('isAuthenticated');
       })
   },
 });

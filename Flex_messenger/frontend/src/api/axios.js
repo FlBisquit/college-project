@@ -1,13 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: 'http://localhost:8000/api',
   withCredentials: true, // For session cookies
 });
 
 // Fetch CSRF token
 const getCsrfToken = async () => {
-  const response = await axios.get('/api/csrf/', { withCredentials: true });
+  const response = await api.get('/csrf/');
   return response.data.csrfToken;
 };
 

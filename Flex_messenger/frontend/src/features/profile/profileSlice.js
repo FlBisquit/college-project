@@ -29,6 +29,10 @@ export const getMe = createAsyncThunk(
   'profile/getMe',
   async (skipIfCached = false, { getState, rejectWithValue }) => {
     const { user } = getState().profile;
+    const { isAuthenticated } = getState().auth;
+    if (!isAuthenticated) {
+      return rejectWithValue({ message: 'Пользователь не аутентифицирован' });
+    }
     if (user && !skipIfCached) return user;
     try {
       const { data } = await api.get('/users/profile/');

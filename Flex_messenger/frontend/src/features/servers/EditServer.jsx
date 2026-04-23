@@ -17,7 +17,8 @@ const EditServer = () => {
     name: '',
     description: '',
     is_public: true,
-    avatar: null
+    avatar: null,
+    max_users: ''
   });
 
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -32,7 +33,8 @@ const EditServer = () => {
         name: foundServer.name || '',
         description: foundServer.description || '',
         is_public: foundServer.is_public,
-        avatar: null // Не загружаем файл, только URL
+        avatar: null, // Не загружаем файл, только URL
+        max_users: foundServer.max_users || ''
       });
       if (foundServer.avatar_url) {
         setAvatarPreview(foundServer.avatar_url);
@@ -68,6 +70,9 @@ const EditServer = () => {
     serverData.append('name', formData.name);
     serverData.append('description', formData.description);
     serverData.append('is_public', formData.is_public);
+    if (formData.max_users) {
+      serverData.append('max_users', formData.max_users);
+    }
 
     if (formData.avatar) {
       serverData.append('avatar', formData.avatar);
@@ -157,20 +162,35 @@ const EditServer = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label className="checkbox-label">
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
+              <div>
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="is_public"
+                    checked={formData.is_public}
+                    onChange={handleInputChange}
+                  />
+                  <span className="checkmark"></span>
+                  Make this server public
+                </label>
+                <p className="checkbox-description">
+                  Anyone can find and join this server. You can change this later.
+                </p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginLeft: 'auto' }}>
+                <label htmlFor="max_users" style={{ fontSize: '14px', marginBottom: '4px' }}>Maximum users</label>
                 <input
-                  type="checkbox"
-                  name="is_public"
-                  checked={formData.is_public}
+                  type="number"
+                  id="max_users"
+                  name="max_users"
+                  value={formData.max_users}
                   onChange={handleInputChange}
+                  min="1"
+                  max="12"
+                  style={{ width: '70px' }}
                 />
-                <span className="checkmark"></span>
-                Make this server public
-              </label>
-              <p className="checkbox-description">
-                Anyone can find and join this server. You can change this later.
-              </p>
+              </div>
             </div>
 
             <div className="form-actions">

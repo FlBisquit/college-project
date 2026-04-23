@@ -7,21 +7,21 @@
 .server-card-container {
   background-color: #464A4F; /* Цвет карточки-контейнера */
   border-radius: 50px;
-  padding: 40px;
-  margin-bottom: 30px;
+  padding: 30px;
+  margin-bottom: 20px;
 }
 
 .section-title {
   color: white;
   font-size: 32px;
-  margin-bottom: 30px;
+  margin-bottom: 3px;
   font-weight: 600;
 }
 
 .servers-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 25px;
+  gap: 15px;
 }
 
 /* Плитка сервера */
@@ -32,13 +32,18 @@
   cursor: pointer;
 }
 
+/* Ограничение ширины для Public Servers */
+.public-servers .servers-grid {
+  max-width: 915px;
+}
+
 
 
 .tile-avatar-box {
   width: 100%;
   height: 100%;
   background-color: #6A6E71;
-  border-radius: 35px; /* Скругленный квадрат */
+  border-radius: 30px; /* Скругленный квадрат */
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -69,15 +74,15 @@
 /* Пустая плитка */
 .server-tile.empty {
   background-color: #6A6E71;
-  border-radius: 35px;
+  border-radius: 30px;
   opacity: 0.3;
 }
 
 /* Кнопка ПЛЮС */
 .add-server-btn {
   all: unset;
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   background-color: #86c331; /* Твой зеленый */
   border-radius: 50%; /* Круглая */
   display: flex;

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getMe, updateProfile } from './profileSlice';
 import { logout } from '../auth/authSlice';
+import { Pencil } from 'lucide-react';
 import Loader from '../../components/Loader/Loader';
 import Header from '../../components/Header/Header';
 import './Profile.css';
@@ -25,7 +26,11 @@ function Profile() {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
   const [saveMessage, setSaveMessage] = useState('');
-  const [formData, setFormData] = useState({ email: '', bio: '', date_birth: '' });
+  const [formData, setFormData] = useState(() => ({
+    email: user?.email || '',
+    bio: user?.bio || '',
+    date_birth: user?.date_birth || '',
+  }));
 
   const avatarSrc = useMemo(() => user ? getAvatarSrc(user, avatarPreview) : '', [user, avatarPreview]);
 
@@ -33,15 +38,7 @@ function Profile() {
     if (!user && !isLoading) {
       dispatch(getMe());
     }
-
-    if (user) {
-      setFormData({
-        email: user.email || '',
-        bio: user.bio || '',
-        date_birth: user.date_birth || '',
-      });
-    }
-  }, [dispatch, user, isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, user, isLoading]);
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -85,7 +82,7 @@ function Profile() {
 
           {/* Avatar */}
           <div className="profile-avatar-section">
-            <div className="profile-avatar-wrapper" onClick={() => fileInputRef.current?.click()}>
+            <div className="profile-avatar-wrapper">
               {avatarSrc ? (
                 <img src={avatarSrc} alt="avatar" className="profile-avatar-img" />
               ) : (
@@ -93,14 +90,11 @@ function Profile() {
                   {user.username?.[0]?.toUpperCase()}
                 </div>
               )}
-              <div className="profile-avatar-overlay">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-                Edit
-              </div>
             </div>
+            <button className="edit-avatar-btn" onClick={() => fileInputRef.current?.click()}>
+              <Pencil size={14} color="#1e1f22" />
+              Edit
+            </button>
             <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
           </div>
 

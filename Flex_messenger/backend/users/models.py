@@ -51,9 +51,8 @@ class User(AbstractUser):
 
     @property
     def last_seen_display(self):
-        # т.к Pylace ожидает еще None
         if not self.last_seen:
-            return ''
+            return 'Никогда'
         delta = tz.now() - self.last_seen
         if delta.seconds < 60:
             return 'Только что'
@@ -81,6 +80,7 @@ class User(AbstractUser):
 class EmailVerification(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verification')
     code = models.CharField(max_length=6)
+    attempts = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def is_expired(self):
