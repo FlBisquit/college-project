@@ -146,14 +146,7 @@
   font-family: var(--font);
   color: var(--muted);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
   background-color: #841414;
-  color: #000000;
-}
-
-.btn-logout:hover {
-  border-color: var(--error);
-  color: var(--error);
   color: #000000;
 }
 

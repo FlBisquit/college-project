@@ -5,11 +5,12 @@ from users.models import User
 
 class Server(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, unique=True)
     description = models.TextField(blank=True)
     avatar = models.ImageField(upload_to='server_avatars/', blank=True, null=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_servers')
     members = models.ManyToManyField(User, through='ServerMember', related_name='servers')
+    is_public = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -36,8 +37,8 @@ class ServerMember(models.Model):
 
     class Meta:
         unique_together = ('server', 'user')
-        verbose_name = 'Участник сервера'
-        verbose_name_plural = 'Участники сервера'
+        verbose_name = 'Владелец сервера'
+        verbose_name_plural = 'Владельцы серверов'
 
     def __str__(self):
-        return f'{self.user.username} → {self.server.name} ({self.get_role_display()})'
+        return f'{self.user.username} → {self.server.name} ({self.get_role_display()})'  # type: ignore[attr-defined]

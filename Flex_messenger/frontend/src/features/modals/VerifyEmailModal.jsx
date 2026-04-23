@@ -1,14 +1,34 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { verifyEmail } from '../../features/auth/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { verifyEmail, resendCode } from '../../features/auth/authSlice';
+import { closeModal } from './modalsSlice';
 import './VerifyEmailModal.css';
 
-function VerifyEmailModal({ userId, email, onVerified }) {
+function VerifyEmailModal({ userId, email, onClose }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(() => localStorage.getItem('verifyCode') || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [resendMessage, setResendMessage] = useState('');
+
+  const handleCodeChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setCode(value);
+    localStorage.setItem('verifyCode', value);
+  };
+
+  const handleResend = async () => {
+    setResendMessage('');
+    const result = await dispatch(resendCode(userId));
+    if (!result.error) {
+      setResendMessage(result.payload.message);
+    } else {
+      setResendMessage(result.payload?.message || 'Ошибка отправки');
+    }
+  };
 
   const handleSubmit = async () => {
     if (code.length !== 6) {
@@ -24,7 +44,8 @@ function VerifyEmailModal({ userId, email, onVerified }) {
     setIsLoading(false);
 
     if (!result.error) {
-      onVerified();
+      navigate('/');
+      dispatch(closeModal());
     } else {
       setError(result.payload?.detail || 'Неверный код');
     }
@@ -33,6 +54,7 @@ function VerifyEmailModal({ userId, email, onVerified }) {
   return (
     <div className="modal-overlay">
       <div className="modal-card">
+        <button className="modal-close-btn" onClick={onClose}>×</button>
         <div className="modal-icon">✉</div>
 
         <h3 className="modal-title">Подтвердите email</h3>
@@ -49,7 +71,7 @@ function VerifyEmailModal({ userId, email, onVerified }) {
           maxLength={6}
           placeholder="_ _ _ _ _ _"
           value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+          onChange={handleCodeChange}
         />
 
         <button
@@ -59,6 +81,15 @@ function VerifyEmailModal({ userId, email, onVerified }) {
         >
           {isLoading ? 'Проверяем...' : 'Подтвердить'}
         </button>
+
+        <button
+          className="modal-btn-secondary"
+          onClick={handleResend}
+        >
+          Отправить код повторно
+        </button>
+
+        {resendMessage && <p className="modal-message">{resendMessage}</p>}
 
         <p className="modal-hint">Не пришло письмо? Проверьте папку «Спам»</p>
       </div>

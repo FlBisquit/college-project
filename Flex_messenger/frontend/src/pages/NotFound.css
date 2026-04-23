@@ -62,11 +62,9 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s ease;
 }
 
-.notfound-btn:hover {
-  background: #74a928;
+
 }
 
 /* ── Animation ───────────────────────────────────────────── */

@@ -35,3 +35,22 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #86C231;
 }
+
+/* ── Loading before React ─────────────────────────────────── */
+#root:empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #222629;
+}
+
+#root:empty::before {
+  content: "";
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

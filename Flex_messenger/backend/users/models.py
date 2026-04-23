@@ -14,9 +14,10 @@ def avatar_upload_path(instance, filename):
 class User(AbstractUser):
     """Кастомная модель пользователя"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField(unique=True)
+    # почту менять нельзя
+    email = models.EmailField(unique=True, editable=False)
     bio = models.TextField(max_length=500, blank=True, default='')
-    date_birth = models.DateField(null=True, blank=True)
+    date_birth = models.DateField(null=True, blank=True) 
     avatar = models.ImageField(upload_to=avatar_upload_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_seen = models.DateTimeField(null=True, blank=True)

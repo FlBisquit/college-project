@@ -15,7 +15,7 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ['is_staff', 'is_active', 'is_superuser', 'is_verified']
     search_fields = ['username', 'email']
     ordering = ['-created_at']
-    readonly_fields = ['id', 'created_at', 'last_seen']
+    readonly_fields = ['id', 'created_at', 'last_seen', 'email']
 
     fieldsets = list(UserAdmin.fieldsets) + [
         ('Дополнительно', {

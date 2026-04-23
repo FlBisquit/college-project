@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getMe, logout, updateProfile } from '../features/auth/authSlice';
-import Loader from '../components/Loader/Loader';
-import Header from '../components/Header/Header';
+import { getMe, updateProfile } from './profileSlice';
+import { logout } from '../auth/authSlice';
+import Loader from '../../components/Loader/Loader';
+import Header from '../../components/Header/Header';
 import './Profile.css';
 
 const BASE_URL = 'http://127.0.0.1:8000';
@@ -18,7 +19,7 @@ const getAvatarSrc = (user, preview) => {
 function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, loading } = useSelector((state) => state.auth);
+  const { user, isLoading } = useSelector((state) => state.profile);
   const fileInputRef = useRef(null);
 
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -26,13 +27,13 @@ function Profile() {
   const [saveMessage, setSaveMessage] = useState('');
   const [formData, setFormData] = useState({ email: '', bio: '', date_birth: '' });
 
-  const avatarSrc = useMemo(() => user ? getAvatarSrc(user, avatarPreview) : '', [user?.avatar, avatarPreview]);
+  const avatarSrc = useMemo(() => user ? getAvatarSrc(user, avatarPreview) : '', [user, avatarPreview]);
 
   useEffect(() => {
-    if (!user && !loading) {
+    if (!user && !isLoading) {
       dispatch(getMe());
     }
-    
+
     if (user) {
       setFormData({
         email: user.email || '',
@@ -40,7 +41,7 @@ function Profile() {
         date_birth: user.date_birth || '',
       });
     }
-  }, [dispatch, user, loading]);
+  }, [dispatch, user, isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -70,7 +71,7 @@ function Profile() {
 
   const handleLogout = async () => {
     await dispatch(logout());
-    navigate('/login');
+    navigate('/');
   };
 
   if (!user) return <Loader />;

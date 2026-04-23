@@ -94,8 +94,8 @@ function Login() {
             </div>
 
             <div className="auth-actions">
-              <button type="submit" disabled={isLoading} className="auth-btn-next">
-                {isLoading ? 'Loading...' : 'Next'} <span className="btn-arrow">›</span>
+              <button type="submit" className={`auth-btn-next ${isLoading ? 'loading' : ''}`}>
+                {'Next'} <span className="btn-arrow">›</span>
               </button>
             </div>
           </div>

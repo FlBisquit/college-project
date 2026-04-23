@@ -188,9 +188,9 @@
   transition: background 0.2s, transform 0.1s;
 }
 
-.auth-btn-next:hover    { background: var(--accent-hover); }
-.auth-btn-next:active   { transform: scale(0.98); }
-.auth-btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
+.auth-btn-next:active   { background: gray; }
+.auth-btn-next.loading  { background: gray; }
+.auth-btn-next:disabled { background: gray; cursor: not-allowed; }
 
 .btn-arrow { font-size: 20px; line-height: 1; }
 

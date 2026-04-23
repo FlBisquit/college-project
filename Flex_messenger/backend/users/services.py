@@ -1,29 +1,10 @@
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework.permissions import BasePermission
 from .models import User, EmailVerification
 import random
 from django.utils import timezone
-
-
-class AuthService:
-
-    @staticmethod
-    def get_tokens(user) -> dict:
-        refresh = RefreshToken.for_user(user)
-        return {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }
-
-    @staticmethod
-    def logout(refresh_token: str) -> bool:
-        """Добавляет refresh токен в blacklist. Возвращает False если токен невалидный"""
-        try:
-            token = RefreshToken(refresh_token)  # type: ignore
-            token.blacklist()
-            return True
-        except TokenError:
-            return False
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
 
 
 class UserService:
@@ -65,7 +46,40 @@ class VerificationService:
             user=user,
             defaults={'code': code, 'created_at': timezone.now()}
         )
+        # Send email with code
+        try:
+            html = render_to_string('users/email_verification.html', {
+                'username': user.username,
+                'code': code,
+            })
+            msg = EmailMultiAlternatives(
+                subject='Подтверждение email',
+                body='',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[user.email]
+            )
+            msg.attach_alternative(html, 'text/html')
+            msg.send()
+        except Exception as e:
+            print(f'Error sending email to {user.email}: {e}')
         return code
+
+    @staticmethod
+    def resend_code(user_id: str) -> tuple[bool, str]:
+        """Повторно отправляет код верификации"""
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return False, 'Пользователь не найден'
+
+        if user.is_verified:
+            return False, 'Email уже подтверждён'
+
+        try:
+            code = VerificationService.create_or_update(user)
+            return True, f'Код отправлен на {user.email}'
+        except Exception as e:
+            return False, f'Ошибка отправки email: {str(e)}'
 
     @staticmethod
     def verify(user_id: str, code: str) -> tuple[bool, str]:
@@ -86,3 +100,15 @@ class VerificationService:
         verification.user.save()
         verification.delete()
         return True, ''
+
+
+class IsVerified(BasePermission):
+    """
+    Проверяет, что пользователь подтвердил email
+    """
+    message = "Необходимо подтвердить email для доступа к этому ресурсу"
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return request.user.is_verified

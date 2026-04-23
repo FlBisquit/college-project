@@ -14,15 +14,43 @@ class ServerMemberSerializer(serializers.ModelSerializer):
 
 class ServerSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
+    avatar_url = serializers.SerializerMethodField()
     members_count = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
 
     class Meta:
         model = Server
-        fields = ['id', 'name', 'description', 'avatar', 'owner', 'members_count', 'created_at']
+        fields = [
+            'id',
+            'name',
+            'description',
+            'avatar',
+            'avatar_url',
+            'owner',
+            'members_count',
+            'is_owner',
+            'is_public',
+            'created_at'
+        ]
         read_only_fields = ['id', 'owner', 'created_at']
+
+    def get_avatar_url(self, obj):
+        """Возвращает абсолютный URL аватара"""
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return None
 
     def get_members_count(self, obj):
         return obj.server_members.count()
+
+    def get_is_owner(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.owner == request.user
+        return False
 
 
 class ServerDetailSerializer(ServerSerializer):

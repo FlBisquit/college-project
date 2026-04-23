@@ -1,23 +1,20 @@
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
-import { logout, getMe } from "../../features/auth/authSlice";
+import { getMe } from "../../features/profile/profileSlice";
 import logo from "../../assets/images/logo.png";
 import "./Header.css";
 
 const Header = () => {
   const dispatch = useDispatch();
-  const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isLoading } = useSelector((state) => state.profile);
 
   useEffect(() => {
-    if (isAuthenticated && !user && !loading) {
+    if (isAuthenticated && !user && !isLoading) {
       dispatch(getMe());
     }
-  }, [isAuthenticated, user, loading, dispatch]);
-
-  const handleLogout = () => {
-    dispatch(logout());
-  };
+  }, [isAuthenticated, user, isLoading, dispatch]);
 
   return (
     <header className="main-header">
@@ -30,8 +27,7 @@ const Header = () => {
         <nav className="nav-actions">
           {isAuthenticated ? (
             <>
-              <Link to="/profile" className="nav-link">Profile</Link>
-              <button className="btn-logout" onClick={handleLogout}>Exit</button>
+              <Link to="/profile" className="btn-primary-sm">Profile</Link>
             </>
           ) : (
             <>

@@ -6,17 +6,12 @@ tzdata==2025.3
 
 # Django REST Framework
 djangorestframework==3.14.0
-djangorestframework-simplejwt==5.4.0
 
 # CORS для React
 django-cors-headers==4.6.0
 
 # Работа с изображениями
 pillow>=11.2.0  
-
-# Тестирование
-pytest==8.0.0
-pytest-django==4.8.0
 
 # WebSocket (Channels)
 channels==4.2.0
@@ -28,3 +23,9 @@ django-vite==3.1.0
 
 # .env - переменные окружения
 python-decouple==3.8
+
+# Tests
+pytest-django==4.7.0
+selenium==4.15.2
+pytest==7.4.3
+webdriver-manager==4.0.1

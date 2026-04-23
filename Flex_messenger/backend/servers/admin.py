@@ -6,13 +6,14 @@ from .models import Server, ServerMember
 class ServerMemberInline(admin.TabularInline):
     model = ServerMember
     extra = 0
-    readonly_fields = ['joined_at']
-    fields = ['user', 'role', 'joined_at']
+    readonly_fields = ['id', 'joined_at']
+    fields = ['id', 'user', 'role', 'joined_at']
 
 
 @admin.register(Server)
 class ServerAdmin(admin.ModelAdmin):
     list_display = ['name', 'owner', 'members_count', 'created_at']
+    fields = ['id', 'name', 'description', 'avatar', 'owner', 'is_public', 'created_at']
     search_fields = ['name', 'owner__username']
     readonly_fields = ['id', 'created_at']
     inlines = [ServerMemberInline]
@@ -24,7 +25,11 @@ class ServerAdmin(admin.ModelAdmin):
 
 @admin.register(ServerMember)
 class ServerMemberAdmin(admin.ModelAdmin):
-    list_display = ['user', 'server', 'role', 'joined_at']
+    list_display = ['user', 'server', 'role', 'online_count', 'joined_at']
     list_filter = ['role']
     search_fields = ['user__username', 'server__name']
     readonly_fields = ['joined_at']
+
+    def online_count(self, obj):
+        return obj.server.server_members.count()
+    online_count.short_description = 'Онлайн на сервере'

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { register } from './authSlice';
-import VerifyEmailModal from '../../components/VerifyEmailModal/VerifyEmailModal';
+import { openModal } from '../../features/modals/modalsSlice';
 import logo from '../../assets/images/logo.png';
 import '../../styles/Auth.css';
 
@@ -71,8 +71,8 @@ function Register() {
     password2: '',
     date_birth: '',
   });
-  const [userId, setUserId] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+
+
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -82,13 +82,17 @@ function Register() {
     e.preventDefault();
     const result = await dispatch(register(formData));
     if (!result.error) {
-      setUserId(result.payload.id); // user_id из ответа бэкенда
-      setShowModal(true);
+      dispatch(openModal({
+        type: 'verifyEmail',
+        data: {
+          userId: result.payload.user_id,
+          email: formData.email
+        }
+      }));
     }
   };
 
   const handleVerified = () => {
-    setShowModal(false);
     navigate('/');
   };
 
@@ -131,8 +135,8 @@ function Register() {
             </div>
 
             <div className="auth-actions">
-              <button type="submit" disabled={isLoading} className="auth-btn-next">
-                {isLoading ? 'Loading...' : 'Next'} <span className="btn-arrow">›</span>
+              <button type="submit" className={`auth-btn-next ${isLoading ? 'loading' : ''}`}>
+                {'Next'} <span className="btn-arrow">›</span>
               </button>
             </div>
           </div>
@@ -144,14 +148,6 @@ function Register() {
           Already have an account? <Link to="/login">Login</Link>
         </p>
       </div>
-
-      {showModal && (
-        <VerifyEmailModal
-          userId={userId}
-          email={formData.email}
-          onVerified={handleVerified}
-        />
-      )}
     </div>
   );
 }

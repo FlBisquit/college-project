@@ -1,0 +1,110 @@
+.auth-bg {
+  padding: 120px 20px 40px; /* Вернул padding-top обратно чтобы хедер не перекрывал */
+  background-color: #1e1f22; /* Темный фон страницы */
+  min-height: 100vh;
+}
+
+.server-card-container {
+  background-color: #464A4F; /* Цвет карточки-контейнера */
+  border-radius: 50px;
+  padding: 40px;
+  margin-bottom: 30px;
+}
+
+.section-title {
+  color: white;
+  font-size: 32px;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.servers-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+}
+
+/* Плитка сервера */
+.server-tile {
+  width: 140px;
+  height: 140px;
+  position: relative;
+  cursor: pointer;
+}
+
+
+
+.tile-avatar-box {
+  width: 100%;
+  height: 100%;
+  background-color: #6A6E71;
+  border-radius: 35px; /* Скругленный квадрат */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile-avatar-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tile-default-avatar {
+  font-size: 50px;
+  color: white;
+  font-weight: bold;
+}
+
+.tile-label {
+  position: absolute;
+  bottom: 12px;
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  color: black;
+}
+
+/* Пустая плитка */
+.server-tile.empty {
+  background-color: #6A6E71;
+  border-radius: 35px;
+  opacity: 0.3;
+}
+
+/* Кнопка ПЛЮС */
+.add-server-btn {
+  all: unset;
+  width: 140px;
+  height: 140px;
+  background-color: #86c331; /* Твой зеленый */
+  border-radius: 50%; /* Круглая */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1e1f22;
+  font-size: 80px;
+  cursor: pointer;
+}
+
+
+
+/* Кнопка редактирования сервера */
+.edit-server-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  background-color: #86c331; /* Зеленый */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1e1f22;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 10;
+}
+

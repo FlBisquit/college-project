@@ -1,4 +1,4 @@
-from rest_framework import generics, status
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -8,46 +8,132 @@ from .models import Server, ServerMember
 from .serializers import ServerSerializer, ServerDetailSerializer, ServerMemberSerializer
 
 
-class ServerListCreateView(generics.ListCreateAPIView):
-    """Список серверов / создать сервер"""
+class ServerListCreateView(APIView):
+    """Список всех серверов / создать сервер"""
     permission_classes = [IsAuthenticated]
-    serializer_class = ServerSerializer
 
-    def get_queryset(self):
-        return Server.objects.all().select_related('owner')
+    def get(self, request):
+        """Список всех серверов"""
+        servers = Server.objects.all().select_related('owner')
+        serializer = ServerSerializer(servers, many=True, context={'request': request})
+        return Response(
+            {'message': 'Список серверов', 'data': serializer.data},
+            status=status.HTTP_200_OK
+        )
 
-    def perform_create(self, serializer):
-        server = serializer.save(owner=self.request.user)
+    def post(self, request):
+        """Создать сервер"""
+        if request.user.owned_servers.count() >= 6:
+            return Response(
+                {'message': 'Вы не можете создать больше 6 серверов'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = ServerSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        server = serializer.save(owner=request.user)
         # владелец автоматически становится участником
         ServerMember.objects.create(
             server=server,
-            user=self.request.user,
+            user=request.user,
             role=ServerMember.Role.OWNER
         )
 
+        return Response(
+            {'message': 'Сервер успешно создан', 'data': serializer.data},
+            status=status.HTTP_201_CREATED
+        )
 
-class ServerDetailView(generics.RetrieveUpdateDestroyAPIView):
+
+class MyServersView(APIView):
+    """Получить мои серверы"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        servers = request.user.servers.all().select_related('owner')
+        serializer = ServerSerializer(servers, many=True, context={'request': request})
+        return Response(
+            {'message': 'Ваши серверы', 'data': serializer.data},
+            status=status.HTTP_200_OK
+        )
+
+
+class PublicServersView(APIView):
+    """Получить публичные серверы"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        servers = Server.objects.filter(is_public=True).exclude(owner=request.user).select_related('owner')
+        serializer = ServerSerializer(servers, many=True, context={'request': request})
+        return Response(
+            {'message': 'Публичные серверы', 'data': serializer.data},
+            status=status.HTTP_200_OK
+        )
+
+
+class ServerDetailView(APIView):
     """Получить / обновить / удалить сервер"""
     permission_classes = [IsAuthenticated]
-    queryset = Server.objects.all()
 
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return ServerDetailSerializer
-        return ServerSerializer
+    def get(self, request, pk):
+        server = get_object_or_404(Server, pk=pk)
+        serializer = ServerDetailSerializer(server, context={'request': request})
+        return Response(
+            {'message': 'Детали сервера', 'data': serializer.data},
+            status=status.HTTP_200_OK
+        )
 
-    def update(self, request, *args, **kwargs):
-        server = self.get_object()
+    def patch(self, request, pk):
+        server = get_object_or_404(Server, pk=pk)
+        
         if server.owner != request.user:
-            return Response({'detail': 'Нет прав'}, status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, *args, **kwargs)
+            return Response(
+                {'message': 'У вас нет прав для редактирования этого сервера'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = ServerSerializer(server, data=request.data, partial=True, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response(
+            {'message': 'Сервер успешно обновлён', 'data': serializer.data},
+            status=status.HTTP_200_OK
+        )
 
-    def destroy(self, request, *args, **kwargs):
-        server = self.get_object()
+    def put(self, request, pk):
+        server = get_object_or_404(Server, pk=pk)
+        
         if server.owner != request.user:
-            return Response({'detail': 'Нет прав'}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {'message': 'У вас нет прав для редактирования этого сервера'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = ServerSerializer(server, data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response(
+            {'message': 'Сервер успешно обновлён', 'data': serializer.data},
+            status=status.HTTP_200_OK
+        )
+
+    def delete(self, request, pk):
+        server = get_object_or_404(Server, pk=pk)
+        
+        if server.owner != request.user:
+            return Response(
+                {'message': 'У вас нет прав для удаления этого сервера'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
         server.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'message': 'Сервер успешно удалён'},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 class JoinServerView(APIView):
@@ -57,11 +143,26 @@ class JoinServerView(APIView):
     def post(self, request, pk):
         server = get_object_or_404(Server, pk=pk)
 
+        # Проверяем приватный ли сервер
+        if not server.is_public:
+            return Response(
+                {'message': 'Это приватный сервер'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Проверяем, не уже ли пользователь на сервере
         if ServerMember.objects.filter(server=server, user=request.user).exists():
-            return Response({'detail': 'Вы уже на сервере'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'message': 'Вы уже являетесь участником этого сервера'},
+                status=status.HTTP_409_CONFLICT
+            )
 
         ServerMember.objects.create(server=server, user=request.user)
-        return Response({'detail': 'Вы вступили на сервер'}, status=status.HTTP_201_CREATED)
+        serializer = ServerSerializer(server, context={'request': request})
+        return Response(
+            {'message': 'Вы успешно присоединились к серверу', 'data': serializer.data},
+            status=status.HTTP_201_CREATED
+        )
 
 
 class LeaveServerView(APIView):
@@ -72,20 +173,38 @@ class LeaveServerView(APIView):
         server = get_object_or_404(Server, pk=pk)
 
         if server.owner == request.user:
-            return Response({'detail': 'Владелец не может покинуть сервер'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'message': 'Владелец не может покинуть сервер'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        ServerMember.objects.filter(server=server, user=request.user).delete()
-        return Response({'detail': 'Вы покинули сервер'})
+        membership = ServerMember.objects.filter(server=server, user=request.user)
+        if not membership.exists():
+            return Response(
+                {'message': 'Вы не являетесь участником этого сервера'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        membership.delete()
+        return Response(
+            {'message': 'Вы успешно покинули сервер'},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
-class ServerMembersView(generics.ListAPIView):
+class ServerMembersView(APIView):
     """Список участников сервера"""
     permission_classes = [IsAuthenticated]
-    serializer_class = ServerMemberSerializer
 
-    def get_queryset(self):
-        server = get_object_or_404(Server, pk=self.kwargs['pk'])
-        return ServerMember.objects.filter(server=server).select_related('user')
+    def get(self, request, pk):
+        server = get_object_or_404(Server, pk=pk)
+        members = ServerMember.objects.filter(server=server).select_related('user')
+        serializer = ServerMemberSerializer(members, many=True, context={'request': request})
+        
+        return Response(
+            {'message': 'Участники сервера', 'data': serializer.data},
+            status=status.HTTP_200_OK
+        )
 
 
 class UpdateMemberRoleView(APIView):
@@ -98,14 +217,23 @@ class UpdateMemberRoleView(APIView):
         # проверяем права
         requester = get_object_or_404(ServerMember, server=server, user=request.user)
         if requester.role not in [ServerMember.Role.OWNER, ServerMember.Role.ADMIN]:
-            return Response({'detail': 'Нет прав'}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {'message': 'У вас нет прав для изменения ролей участников'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         member = get_object_or_404(ServerMember, server=server, user_id=user_id)
         new_role = request.data.get('role')
 
         if new_role not in [ServerMember.Role.ADMIN, ServerMember.Role.MEMBER]:
-            return Response({'detail': 'Недопустимая роль'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'message': 'Недопустимая роль'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         member.role = new_role
         member.save()
-        return Response(ServerMemberSerializer(member).data)
+        return Response(
+            {'message': 'Роль участника успешно обновлена', 'data': ServerMemberSerializer(member).data},
+            status=status.HTTP_200_OK
+        )
