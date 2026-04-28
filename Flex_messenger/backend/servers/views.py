@@ -14,22 +14,17 @@ class ServerListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        """Список всех серверов с кешированием"""
         cache_key = 'servers:all_list'
-        servers = cache.get(cache_key)
-        
-        if servers is None:
+        data = cache.get(cache_key)
+
+        if data is None:
             servers = Server.objects.all().select_related('owner')
-            cache.set(cache_key, servers, 300)  # кеш на 5 минут
-        
-        serializer = ServerSerializer(servers, many=True, context={'request': request})
-        return Response(
-            {'message': 'Список серверов', 'data': serializer.data},
-            status=status.HTTP_200_OK
-        )
+            data = ServerSerializer(servers, many=True, context={'request': request}).data
+            cache.set(cache_key, data, None)
+
+        return Response({'message': 'Список серверов', 'data': data}, status=status.HTTP_200_OK)
 
     def post(self, request):
-        """Создать сервер"""
         if request.user.owned_servers.count() >= 5:
             return Response(
                 {'message': 'Вы не можете создать больше 5 серверов'},
@@ -38,17 +33,17 @@ class ServerListCreateView(APIView):
 
         serializer = ServerSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-
         server = serializer.save(owner=request.user)
+
         ServerMember.objects.create(
             server=server,
             user=request.user,
             role=ServerMember.Role.OWNER
         )
-        
-        # инвалидируем кеш после создания
+
         cache.delete('servers:all_list')
         cache.delete('servers:public_list')
+        cache.delete(f'servers:user_{request.user.id}_list')
 
         return Response(
             {'message': 'Сервер успешно создан', 'data': serializer.data},
@@ -62,17 +57,14 @@ class MyServersView(APIView):
 
     def get(self, request):
         cache_key = f'servers:user_{request.user.id}_list'
-        servers = cache.get(cache_key)
-        
-        if servers is None:
+        data = cache.get(cache_key)
+
+        if data is None:
             servers = request.user.servers.all().select_related('owner')
-            cache.set(cache_key, servers, 300)  # кеш на 5 минут
-        
-        serializer = ServerSerializer(servers, many=True, context={'request': request})
-        return Response(
-            {'message': 'Ваши серверы', 'data': serializer.data},
-            status=status.HTTP_200_OK
-        )
+            data = ServerSerializer(servers, many=True, context={'request': request}).data
+            cache.set(cache_key, data, None)
+
+        return Response({'message': 'Ваши серверы', 'data': data}, status=status.HTTP_200_OK)
 
 
 class PublicServersView(APIView):
@@ -81,17 +73,14 @@ class PublicServersView(APIView):
 
     def get(self, request):
         cache_key = 'servers:public_list'
-        servers = cache.get(cache_key)
-        
-        if servers is None:
+        data = cache.get(cache_key)
+
+        if data is None:
             servers = Server.objects.filter(is_public=True).exclude(owner=request.user).select_related('owner')
-            cache.set(cache_key, servers, 300)  # кеш на 5 минут
-        
-        serializer = ServerSerializer(servers, many=True, context={'request': request})
-        return Response(
-            {'message': 'Публичные серверы', 'data': serializer.data},
-            status=status.HTTP_200_OK
-        )
+            data = ServerSerializer(servers, many=True, context={'request': request}).data
+            cache.set(cache_key, data, None)
+
+        return Response({'message': 'Публичные серверы', 'data': data}, status=status.HTTP_200_OK)
 
 
 class ServerDetailView(APIView):
@@ -100,34 +89,30 @@ class ServerDetailView(APIView):
 
     def get(self, request, pk):
         cache_key = f'server:detail_{pk}'
-        server = cache.get(cache_key)
-        
-        if server is None:
+        data = cache.get(cache_key)
+
+        if data is None:
             server = get_object_or_404(Server, pk=pk)
-            cache.set(cache_key, server, 600)  # кеш на 10 минут
-        
-        serializer = ServerDetailSerializer(server, context={'request': request})
-        return Response(
-            {'message': 'Детали сервера', 'data': serializer.data},
-            status=status.HTTP_200_OK
-        )
+            data = ServerDetailSerializer(server, context={'request': request}).data
+            cache.set(cache_key, data, None)
+
+        return Response({'message': 'Детали сервера', 'data': data}, status=status.HTTP_200_OK)
 
     def patch(self, request, pk):
         server = get_object_or_404(Server, pk=pk)
-        
+
         if server.owner != request.user:
             return Response(
                 {'message': 'У вас нет прав для редактирования этого сервера'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         serializer = ServerSerializer(server, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        
-        # инвалидируем кеши
-        self._invalidate_server_cache(pk)
-        
+
+        self._invalidate_server_cache(server)
+
         return Response(
             {'message': 'Сервер успешно обновлён', 'data': serializer.data},
             status=status.HTTP_200_OK
@@ -135,20 +120,19 @@ class ServerDetailView(APIView):
 
     def put(self, request, pk):
         server = get_object_or_404(Server, pk=pk)
-        
+
         if server.owner != request.user:
             return Response(
                 {'message': 'У вас нет прав для редактирования этого сервера'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         serializer = ServerSerializer(server, data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        
-        # инвалидируем кеши
-        self._invalidate_server_cache(pk)
-        
+
+        self._invalidate_server_cache(server)
+
         return Response(
             {'message': 'Сервер успешно обновлён', 'data': serializer.data},
             status=status.HTTP_200_OK
@@ -156,35 +140,25 @@ class ServerDetailView(APIView):
 
     def delete(self, request, pk):
         server = get_object_or_404(Server, pk=pk)
-        
+
         if server.owner != request.user:
             return Response(
                 {'message': 'У вас нет прав для удаления этого сервера'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
+        self._invalidate_server_cache(server)
         server.delete()
-        
-        # инвалидируем кеши
-        self._invalidate_server_cache(pk)
-        
-        return Response(
-            {'message': 'Сервер успешно удалён'},
-            status=status.HTTP_204_NO_CONTENT
-        )
+
+        return Response({'message': 'Сервер успешно удалён'}, status=status.HTTP_204_NO_CONTENT)
 
     @staticmethod
-    def _invalidate_server_cache(server_id):
-        """Инвалидировать кеши связанные с серверов"""
-        cache.delete(f'server:detail_{server_id}')
+    def _invalidate_server_cache(server: Server):
+        cache.delete(f'server:detail_{server.pk}')
+        cache.delete(f'server:members_{server.pk}')
         cache.delete('servers:all_list')
         cache.delete('servers:public_list')
-        # инвалидируем кеш пользователя (владельца)
-        try:
-            server = Server.objects.get(pk=server_id)
-            cache.delete(f'servers:user_{server.owner.id}_list')
-        except Server.DoesNotExist:
-            pass
+        cache.delete(f'servers:user_{server.owner.id}_list')
 
 
 class JoinServerView(APIView):
@@ -195,10 +169,7 @@ class JoinServerView(APIView):
         server = get_object_or_404(Server, pk=pk)
 
         if not server.is_public:
-            return Response(
-                {'message': 'Это приватный сервер'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({'message': 'Это приватный сервер'}, status=status.HTTP_403_FORBIDDEN)
 
         if ServerMember.objects.filter(server=server, user=request.user).exists():
             return Response(
@@ -206,18 +177,18 @@ class JoinServerView(APIView):
                 status=status.HTTP_409_CONFLICT
             )
 
-        if server.server_members.count() >= server.max_members: # type: ignore
+        if server.server_members.count() >= server.max_members:  # type: ignore
             return Response(
                 {'message': 'Сервер достиг максимального количества участников'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
         ServerMember.objects.create(server=server, user=request.user)
-        
-        # инвалидируем кеши
+
         cache.delete(f'servers:user_{request.user.id}_list')
         cache.delete(f'server:members_{pk}')
-        
+        cache.delete(f'server:detail_{pk}')
+
         serializer = ServerSerializer(server, context={'request': request})
         return Response(
             {'message': 'Вы успешно присоединились к серверу', 'data': serializer.data},
@@ -246,15 +217,12 @@ class LeaveServerView(APIView):
             )
 
         membership.delete()
-        
-        # инвалидируем кеши
+
         cache.delete(f'servers:user_{request.user.id}_list')
         cache.delete(f'server:members_{pk}')
-        
-        return Response(
-            {'message': 'Вы успешно покинули сервер'},
-            status=status.HTTP_204_NO_CONTENT
-        )
+        cache.delete(f'server:detail_{pk}')
+
+        return Response({'message': 'Вы успешно покинули сервер'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class ServerMembersView(APIView):
@@ -263,19 +231,15 @@ class ServerMembersView(APIView):
 
     def get(self, request, pk):
         cache_key = f'server:members_{pk}'
-        members = cache.get(cache_key)
-        
-        if members is None:
+        data = cache.get(cache_key)
+
+        if data is None:
             server = get_object_or_404(Server, pk=pk)
             members = ServerMember.objects.filter(server=server).select_related('user')
-            cache.set(cache_key, members, 300)  # кеш на 5 минут
-        
-        serializer = ServerMemberSerializer(members, many=True, context={'request': request})
-        
-        return Response(
-            {'message': 'Участники сервера', 'data': serializer.data},
-            status=status.HTTP_200_OK
-        )
+            data = ServerMemberSerializer(members, many=True, context={'request': request}).data
+            cache.set(cache_key, data, None)
+
+        return Response({'message': 'Участники сервера', 'data': data}, status=status.HTTP_200_OK)
 
 
 class UpdateMemberRoleView(APIView):
@@ -296,17 +260,13 @@ class UpdateMemberRoleView(APIView):
         new_role = request.data.get('role')
 
         if new_role not in [ServerMember.Role.ADMIN, ServerMember.Role.MEMBER]:
-            return Response(
-                {'message': 'Недопустимая роль'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'message': 'Недопустимая роль'}, status=status.HTTP_400_BAD_REQUEST)
 
         member.role = new_role
         member.save()
-        
-        # инвалидируем кеш участников
+
         cache.delete(f'server:members_{pk}')
-        
+
         return Response(
             {'message': 'Роль участника успешно обновлена', 'data': ServerMemberSerializer(member).data},
             status=status.HTTP_200_OK

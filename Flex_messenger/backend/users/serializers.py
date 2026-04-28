@@ -7,11 +7,8 @@ from typing import cast
 
 
 def validate_avatar_file(value):
-    """валидация размер и тип файла"""
+    """Общая валидация аватара: тип файла"""
     if value:
-        max_size = 5 * 1024 * 1024  # 5 MB
-        if value.size > max_size:
-            raise serializers.ValidationError('Размер файла не должен превышать 5 MB.')
         allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
         if value.content_type not in allowed_types:
             raise serializers.ValidationError('Разрешены только JPG, PNG, GIF, WebP.')
@@ -52,7 +49,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True)
     username = serializers.CharField(validators=[UniqueValidator(queryset=User.objects.all(), message="Пользователь с таким логином уже существует")])
-    email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all(), message="Пользователь с таким email уже существует")])
     avatar = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -62,7 +58,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             'date_birth': {'required': False},
             'avatar': {'required': False, 'allow_null': True},
         }
-
+ 
     def validate(self, data):
         if data['password'] != data['password2']:
             raise serializers.ValidationError({"password2": "Пароли не совпадают"})
