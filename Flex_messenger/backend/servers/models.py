@@ -3,11 +3,18 @@ from django.db import models
 from users.models import User
 
 
+def server_avatar_upload_path(instance, filename):
+    """Функция обработки названий аватаров серверов (под их названия)"""
+    ext = filename.split('.')[-1]
+    return f'server_avatars/{instance.name}.{ext}'
+
+
 class Server(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=20, unique=True)
     description = models.TextField(blank=True)
-    avatar = models.ImageField(upload_to='server_avatars/', blank=True, null=True)
+    avatar = models.ImageField(upload_to=server_avatar_upload_path, blank=True, null=True)
+    max_members = models.PositiveIntegerField(default=2, help_text='Максимальное количество участников 12')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_servers')
     members = models.ManyToManyField(User, through='ServerMember', related_name='servers')
     is_public = models.BooleanField(default=True)

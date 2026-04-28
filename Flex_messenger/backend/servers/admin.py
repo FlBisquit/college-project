@@ -12,8 +12,8 @@ class ServerMemberInline(admin.TabularInline):
 
 @admin.register(Server)
 class ServerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'owner', 'members_count', 'created_at']
-    fields = ['id', 'name', 'description', 'avatar', 'owner', 'is_public', 'created_at']
+    list_display = ['name', 'owner', 'members_count', 'max_members', 'created_at']
+    fields = ['id', 'name', 'description', 'avatar', 'max_members', 'owner', 'is_public', 'created_at']
     search_fields = ['name', 'owner__username']
     readonly_fields = ['id', 'created_at']
     inlines = [ServerMemberInline]

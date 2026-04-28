@@ -1,12 +1,25 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api/axios';
 
-// Получение списка серверов
+// Получение списка всех серверов
 export const fetchServers = createAsyncThunk(
   'servers/fetchServers',
   async (_, { rejectWithValue }) => {
     try {
       const { data } = await api.get('/servers/');
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Ошибка при загрузке');
+    }
+  }
+);
+
+// Получение списка моих серверов
+export const fetchMyServers = createAsyncThunk(
+  'servers/fetchMyServers',
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await api.get('/servers/my_servers/');
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data || 'Ошибка при загрузке');
@@ -57,6 +70,7 @@ const serversSlice = createSlice({
   name: 'servers',
   initialState: {
     servers: [],
+    myServers: [],
     currentServer: null,
     isLoading: false,
     error: null,
@@ -95,8 +109,23 @@ const serversSlice = createSlice({
         // Добавляем новый сервер в список (берем данные из payload.data или самого payload)
         const newServer = payload.data || payload;
         state.servers = [...(state.servers || []), newServer];
+        state.myServers = [...(state.myServers || []), newServer];
       })
       .addCase(createServer.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch My Servers
+      .addCase(fetchMyServers.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchMyServers.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
+        state.myServers = Array.isArray(payload) ? payload : (payload.data || []);
+      })
+      .addCase(fetchMyServers.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

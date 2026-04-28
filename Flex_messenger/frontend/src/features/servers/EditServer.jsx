@@ -11,14 +11,14 @@ const EditServer = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { servers, isLoading } = useSelector(state => state.servers);
+  const { servers, isLoading, error } = useSelector(state => state.servers);
 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     is_public: true,
     avatar: null,
-    max_users: ''
+    max_members: 2
   });
 
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -34,7 +34,7 @@ const EditServer = () => {
         description: foundServer.description || '',
         is_public: foundServer.is_public,
         avatar: null, // Не загружаем файл, только URL
-        max_users: foundServer.max_users || ''
+        max_members: foundServer.max_members || 2
       });
       if (foundServer.avatar_url) {
         setAvatarPreview(foundServer.avatar_url);
@@ -70,9 +70,7 @@ const EditServer = () => {
     serverData.append('name', formData.name);
     serverData.append('description', formData.description);
     serverData.append('is_public', formData.is_public);
-    if (formData.max_users) {
-      serverData.append('max_users', formData.max_users);
-    }
+    serverData.append('max_members', formData.max_members);
 
     if (formData.avatar) {
       serverData.append('avatar', formData.avatar);
@@ -92,12 +90,6 @@ const EditServer = () => {
       data: { serverId: id, serverName: server?.name || 'Неизвестный сервер' }
     }));
   };
-
-
-
-  if (isLoading || !server) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="home-bg">
@@ -179,12 +171,12 @@ const EditServer = () => {
                 </p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginLeft: 'auto' }}>
-                <label htmlFor="max_users" style={{ fontSize: '14px', marginBottom: '4px' }}>Maximum users</label>
+                <label htmlFor="max_members" style={{ fontSize: '14px', marginBottom: '4px' }}>Maximum users</label>
                 <input
                   type="number"
-                  id="max_users"
-                  name="max_users"
-                  value={formData.max_users}
+                  id="max_members"
+                  name="max_members"
+                  value={formData.max_members}
                   onChange={handleInputChange}
                   min="1"
                   max="12"
@@ -192,6 +184,13 @@ const EditServer = () => {
                 />
               </div>
             </div>
+
+            {error && (
+              <div className="error-message">
+                {typeof error === 'object' && error.avatar ? error.avatar[0] :
+                 error.message || error.detail || 'Failed to update server. Please try again.'}
+              </div>
+            )}
 
             <div className="form-actions">
               <button type="submit" disabled={isLoading} className="btn-primary">

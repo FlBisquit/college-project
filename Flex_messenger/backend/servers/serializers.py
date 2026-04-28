@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Server, ServerMember
-from users.serializers import UserSerializer
+from users.serializers import UserSerializer, validate_avatar_file
 
 
 class ServerMemberSerializer(serializers.ModelSerializer):
@@ -26,6 +26,7 @@ class ServerSerializer(serializers.ModelSerializer):
             'description',
             'avatar',
             'avatar_url',
+            'max_members',
             'owner',
             'members_count',
             'is_owner',
@@ -51,6 +52,14 @@ class ServerSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.owner == request.user
         return False
+
+    def validate_max_members(self, value):
+        if value > 12:
+            raise serializers.ValidationError('Максимальное количество участников не может превышать 12.')
+        return value
+
+    def validate_avatar(self, value):
+        return validate_avatar_file(value)
 
 
 class ServerDetailSerializer(ServerSerializer):

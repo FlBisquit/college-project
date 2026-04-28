@@ -8,15 +8,10 @@ from django.utils.decorators import method_decorator
 
 from .models import User
 from .serializers import UserSerializer, UserRegisterSerializer, UserAuthSerializer
-from .services import UserService, VerificationService, IsVerified, VerifyEmailThrottle, ResendCodeThrottle
+from .services import UserService, VerificationService, IsVerified, ResendCodeThrottle
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-# ============================================================================
-# AUTHENTICATION VIEWS
-# ============================================================================
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(views.APIView):
@@ -104,9 +99,6 @@ class LogoutView(views.APIView):
         return Response({"message": "Выход выполнен"})
 
 
-# ============================================================================
-# PROFILE VIEWS
-# ============================================================================
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class ProfileView(views.APIView):
@@ -144,9 +136,6 @@ class ProfileView(views.APIView):
         )
 
 
-# ============================================================================
-# USER LIST & DETAIL VIEWS
-# ============================================================================
 
 class UserListView(views.APIView):
     """Список всех пользователей"""
@@ -183,9 +172,6 @@ class UserDetailView(views.APIView):
         })
 
 
-# ============================================================================
-# EMAIL VERIFICATION VIEWS
-# ============================================================================
 
 @method_decorator(csrf_exempt, name='dispatch')
 class VerifyEmailView(views.APIView):

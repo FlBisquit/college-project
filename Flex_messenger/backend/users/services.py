@@ -18,15 +18,6 @@ logger = logging.getLogger(__name__)
 # RATE LIMITING CLASSES
 # ============================================================================
 
-class VerifyEmailThrottle(UserRateThrottle):
-    """
-    Ограничение на попытки верификации email (brute force защита).
-    5 попыток в час для защиты от перебора кодов.
-    """
-    scope = 'verify_email'
-    rate = '5/h'
-
-
 class ResendCodeThrottle(UserRateThrottle):
     """
     Ограничение на переотправку кода верификации.

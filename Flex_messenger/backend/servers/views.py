@@ -30,9 +30,9 @@ class ServerListCreateView(APIView):
 
     def post(self, request):
         """Создать сервер"""
-        if request.user.owned_servers.count() >= 6:
+        if request.user.owned_servers.count() >= 5:
             return Response(
-                {'message': 'Вы не можете создать больше 6 серверов'},
+                {'message': 'Вы не можете создать больше 5 серверов'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -204,6 +204,12 @@ class JoinServerView(APIView):
             return Response(
                 {'message': 'Вы уже являетесь участником этого сервера'},
                 status=status.HTTP_409_CONFLICT
+            )
+
+        if server.server_members.count() >= server.max_members: # type: ignore
+            return Response(
+                {'message': 'Сервер достиг максимального количества участников'},
+                status=status.HTTP_403_FORBIDDEN
             )
 
         ServerMember.objects.create(server=server, user=request.user)

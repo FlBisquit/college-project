@@ -6,6 +6,18 @@ from .models import User
 from typing import cast
 
 
+def validate_avatar_file(value):
+    """валидация размер и тип файла"""
+    if value:
+        max_size = 5 * 1024 * 1024  # 5 MB
+        if value.size > max_size:
+            raise serializers.ValidationError('Размер файла не должен превышать 5 MB.')
+        allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+        if value.content_type not in allowed_types:
+            raise serializers.ValidationError('Разрешены только JPG, PNG, GIF, WebP.')
+    return value
+
+
 class UserSerializer(serializers.ModelSerializer):
     is_online = serializers.SerializerMethodField()
     online_status = serializers.SerializerMethodField()
@@ -31,6 +43,9 @@ class UserSerializer(serializers.ModelSerializer):
     def get_avatar_url(self, obj):
         return obj.avatar_url()
 
+    def validate_avatar(self, value):
+        return validate_avatar_file(value)
+
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     """Сериализатор для регистрации пользователя"""
@@ -52,6 +67,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         if data['password'] != data['password2']:
             raise serializers.ValidationError({"password2": "Пароли не совпадают"})
         return data
+
+    def validate_avatar(self, value):
+        return validate_avatar_file(value)
 
     def create(self, validated_data):
         validated_data.pop('password2')
