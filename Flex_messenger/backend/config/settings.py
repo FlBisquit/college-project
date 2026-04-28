@@ -20,6 +20,7 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -36,7 +37,9 @@ INSTALLED_APPS = [
     'users',
     'servers',
     'chatting',
+    
 ]
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -189,15 +192,13 @@ CACHES = {
     }
 }
  
-# ==================== CHANNELS (WebSocket) ====================
-# 🔒 Redis DB 0 для WebSocket channel layers
+
  
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
-            'db': 0,  # ← Отдельная DB для Channels
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
         },
     },
 }

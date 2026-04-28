@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/csrf/', csrf_token_view, name='csrf_token'),
     path('api/users/', include('users.urls')),
     path('api/servers/', include('servers.urls')),
+    path('api/chat/', include('chatting.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

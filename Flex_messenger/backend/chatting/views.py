@@ -1,19 +1,14 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from servers.models import Server
+from .models import Message
+from .serializers import MessageSerializer
 
 
-@login_required(login_url='/')
-def room(request, chat_id):
-    server = get_object_or_404(Server, id=server_id, done=False)
-
-    if chat.is_private and request.user not in chat.participants.all():
-        messages.error(request, 'У вас нет доступа к этому чату')
-        return redirect('/users/')
-
-    return render(request, 'chatting/room.html', {
-        'chat': server,
-        'user': request.user,
-        'room_name': server_id,
-    })
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def message_history(request, room_name):
+    messages = Message.objects.filter(server_id=room_name).select_related('author')
+    serializer = MessageSerializer(messages, many=True, context={'request': request})
+    return Response(serializer.data)

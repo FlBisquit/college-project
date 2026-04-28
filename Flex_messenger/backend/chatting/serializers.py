@@ -9,7 +9,7 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = [
             'id',
-            'chat',
+            'server',
             'author',
             'author_username',
             'text',
