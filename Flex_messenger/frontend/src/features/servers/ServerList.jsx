@@ -95,7 +95,7 @@ const ServerList = () => {
             <div
               key={server.id}
               className="server-tile"
-              onClick={() => navigate(`/servers/${server.id}/join`)}
+              onClick={() => navigate(`/servers/${server.id}`)}
               onMouseEnter={() => setHoveredServer(server)}
               onMouseLeave={() => setHoveredServer(null)}
             >
