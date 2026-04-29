@@ -1,5 +1,5 @@
 .auth-bg {
-  padding: 120px 20px 40px; /* Вернул padding-top обратно чтобы хедер не перекрывал */
+  padding: 80px 20px 40px; /* Уменьшил padding-top чтобы карточки были выше к хедеру */
   background-color: #1e1f22; /* Темный фон страницы */
   min-height: 100vh;
 }
@@ -32,9 +32,14 @@
   cursor: pointer;
 }
 
-/* Ограничение ширины для Public Servers */
+/* Фиксированная ширина для обеих секций */
+.servers-grid {
+  width: 915px; /* Статичная ширина как у My servers */
+  max-width: 100%;
+}
+
 .public-servers .servers-grid {
-  max-width: 915px;
+  width: 915px; /* Та же ширина для Public servers */
 }
 
 

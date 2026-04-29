@@ -77,7 +77,7 @@
 /* ── Hero Section ── */
 .home-content {
   max-width: 1200px;
-  margin: 120px auto 0; /* Добавлен margin-top для сдвига вниз */
+  margin: 50px auto 0; /* Добавлен margin-top для сдвига вниз */
   padding: 7px 24px;
   flex-grow: 1;
 }
@@ -122,36 +122,135 @@
   max-width: 450px;
 }
 
+.hero-btns {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 /* ── Mockup ── */
 .hero-mockup {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 24px;
-  padding: 30px;
+  padding: 0;
   animation: float 5s ease-in-out infinite;
+  min-width: 320px;
+  overflow: hidden;
 }
 
-.chat-bubble {
+.mockup-header {
   background: var(--input);
-  padding: 12px 16px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  width: fit-content;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mockup-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mockup-title {
+  font-weight: 600;
   font-size: 14px;
 }
 
-.chat-bubble.me {
-  background: var(--accent);
-  color: var(--accent-text);
+.mockup-status {
+  font-size: 12px;
+  color: var(--muted);
   margin-left: auto;
 }
+
+.chat-window {
+  padding: 24px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.chat-message {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+
+.chat-message.me {
+  flex-direction: row-reverse;
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--accent-text);
+  flex-shrink: 0;
+}
+
+.message-content {
+  flex: 1;
+}
+
+.message-author {
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: var(--muted);
+}
+
+.message-text {
+  background: var(--input);
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.chat-message.me .message-text {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 12px 0;
+  justify-content: center;
+}
+
+.typing-indicator span {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
 
 /* ── Features ── */
 .features-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
-  margin-top: 100px;
+  margin-top: 120px;
+  padding: 0 24px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .feature-item {
@@ -172,15 +271,65 @@
 .feature-item h3 { margin-bottom: 12px; }
 .feature-item p { color: var(--muted); font-size: 14px; }
 
+/* ── CTA Section ── */
+.cta-section {
+  margin-top: 120px;
+  padding: 80px 24px;
+  text-align: center;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-content h2 {
+  font-size: 36px;
+  margin-bottom: 16px;
+}
+
+.cta-content p {
+  font-size: 18px;
+  color: var(--muted);
+  margin-bottom: 40px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-15px); }
 }
 
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
 /* ── Адаптивность ── */
 @media (max-width: 968px) {
-  .hero-section { grid-template-columns: 1fr; text-align: center; }
+  .hero-section { grid-template-columns: 1fr; text-align: center; gap: 40px; }
   .hero-info h1 { font-size: 38px; }
   .hero-info p { margin: 0 auto 40px; }
   .hero-mockup { max-width: 400px; margin: 0 auto; }
+  .hero-btns { justify-content: center; }
+  .features-section { grid-template-columns: 1fr; gap: 20px; margin-top: 80px; }
+  .cta-section { margin-top: 80px; padding: 60px 24px; }
+  .cta-content h2 { font-size: 28px; }
+}
+
+@media (max-width: 640px) {
+  .home-content { margin-top: 80px; padding: 0 16px; }
+  .hero-info h1 { font-size: 32px; }
+  .hero-btns { flex-direction: column; gap: 16px; }
+  .hero-btns .link-secondary { order: -1; }
+  .mockup-header { padding: 12px 16px; }
+  .chat-window { padding: 16px; }
+  .features-section { padding: 0 16px; }
+  .cta-section { padding: 40px 16px; }
 }

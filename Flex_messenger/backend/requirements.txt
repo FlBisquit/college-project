@@ -16,6 +16,7 @@ pillow>=11.2.0
 # WebSocket (Channels)
 channels==4.2.0
 channels-redis==4.2.1
+daphne==4.2.1
 redis==7.1.0
 django-redis==5.4.0
 

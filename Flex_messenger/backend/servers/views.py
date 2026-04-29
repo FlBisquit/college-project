@@ -16,15 +16,16 @@ class ServerListCreateView(APIView):
     def get(self, request):
         """Список всех серверов с кешированием"""
         cache_key = 'servers:all_list'
-        servers = cache.get(cache_key)
-        
-        if servers is None:
+        data = cache.get(cache_key)
+
+        if data is None:
             servers = Server.objects.all().select_related('owner')
-            cache.set(cache_key, servers, 300)  # кеш на 5 минут
-        
-        serializer = ServerSerializer(servers, many=True, context={'request': request})
+            serializer = ServerSerializer(servers, many=True, context={'request': request})
+            data = serializer.data
+            cache.set(cache_key, data, 300)  # кеш на 5 минут
+
         return Response(
-            {'message': 'Список серверов', 'data': serializer.data},
+            {'message': 'Список серверов', 'data': data},
             status=status.HTTP_200_OK
         )
 
@@ -62,15 +63,16 @@ class MyServersView(APIView):
 
     def get(self, request):
         cache_key = f'servers:user_{request.user.id}_list'
-        servers = cache.get(cache_key)
-        
-        if servers is None:
+        data = cache.get(cache_key)
+
+        if data is None:
             servers = request.user.servers.all().select_related('owner')
-            cache.set(cache_key, servers, 300)  # кеш на 5 минут
-        
-        serializer = ServerSerializer(servers, many=True, context={'request': request})
+            serializer = ServerSerializer(servers, many=True, context={'request': request})
+            data = serializer.data
+            cache.set(cache_key, data, 300)  # кеш на 5 минут
+
         return Response(
-            {'message': 'Ваши серверы', 'data': serializer.data},
+            {'message': 'Ваши серверы', 'data': data},
             status=status.HTTP_200_OK
         )
 
@@ -81,15 +83,16 @@ class PublicServersView(APIView):
 
     def get(self, request):
         cache_key = 'servers:public_list'
-        servers = cache.get(cache_key)
-        
-        if servers is None:
+        data = cache.get(cache_key)
+
+        if data is None:
             servers = Server.objects.filter(is_public=True).exclude(owner=request.user).select_related('owner')
-            cache.set(cache_key, servers, 300)  # кеш на 5 минут
-        
-        serializer = ServerSerializer(servers, many=True, context={'request': request})
+            serializer = ServerSerializer(servers, many=True, context={'request': request})
+            data = serializer.data
+            cache.set(cache_key, data, 300)  # кеш на 5 минут
+
         return Response(
-            {'message': 'Публичные серверы', 'data': serializer.data},
+            {'message': 'Публичные серверы', 'data': data},
             status=status.HTTP_200_OK
         )
 
@@ -100,15 +103,16 @@ class ServerDetailView(APIView):
 
     def get(self, request, pk):
         cache_key = f'server:detail_{pk}'
-        server = cache.get(cache_key)
-        
-        if server is None:
+        data = cache.get(cache_key)
+
+        if data is None:
             server = get_object_or_404(Server, pk=pk)
-            cache.set(cache_key, server, 600)  # кеш на 10 минут
-        
-        serializer = ServerDetailSerializer(server, context={'request': request})
+            serializer = ServerDetailSerializer(server, context={'request': request})
+            data = serializer.data
+            cache.set(cache_key, data, 600)  # кеш на 10 минут
+
         return Response(
-            {'message': 'Детали сервера', 'data': serializer.data},
+            {'message': 'Детали сервера', 'data': data},
             status=status.HTTP_200_OK
         )
 
@@ -263,17 +267,17 @@ class ServerMembersView(APIView):
 
     def get(self, request, pk):
         cache_key = f'server:members_{pk}'
-        members = cache.get(cache_key)
-        
-        if members is None:
+        data = cache.get(cache_key)
+
+        if data is None:
             server = get_object_or_404(Server, pk=pk)
             members = ServerMember.objects.filter(server=server).select_related('user')
-            cache.set(cache_key, members, 300)  # кеш на 5 минут
-        
-        serializer = ServerMemberSerializer(members, many=True, context={'request': request})
-        
+            serializer = ServerMemberSerializer(members, many=True, context={'request': request})
+            data = serializer.data
+            cache.set(cache_key, data, 300)  # кеш на 5 минут
+
         return Response(
-            {'message': 'Участники сервера', 'data': serializer.data},
+            {'message': 'Участники сервера', 'data': data},
             status=status.HTTP_200_OK
         )
 
