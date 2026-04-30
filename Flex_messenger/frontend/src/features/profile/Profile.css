@@ -1,0 +1,184 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
+
+/* ========== PROFILE CARD ========== */
+.profile-card {
+  max-width: 680px;
+}
+
+.profile-body {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+/* ========== AVATAR ========== */
+.profile-avatar-section {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.profile-avatar-wrapper {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.profile-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2d2a5e, #7b4a6e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--font);
+}
+
+.profile-avatar-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(26, 34, 64, 0.82);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.profile-avatar-wrapper:hover .profile-avatar-overlay {
+  opacity: 1;
+}
+
+/* Кнопка редактирования аватарки */
+.edit-avatar-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 4px;
+  width: 70px;
+  height: 28px;
+  background-color: #86c331; /* Зеленый */
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #1e1f22;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 100;
+  border: none;
+}
+
+/* ========== FIELDS ========== */
+.profile-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  font-family: var(--font);
+}
+
+.profile-bio {
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-family: var(--font);
+  color: var(--text);
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.5;
+}
+
+.profile-bio::placeholder {
+  color: var(--muted);
+}
+
+.profile-bio:focus {
+  border-color: var(--border-focus);
+}
+
+.save-message {
+  background: var(--accent);
+  color: var(--accent-text);
+  padding: 13px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font);
+  text-align: center;
+}
+
+/* ========== ACTIONS ========== */
+.profile-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.btns-actions{
+  display: flex;
+  justify-content: space-between;
+  width: 406px;
+}
+.btn-logout {
+  background: none;
+  border: 1.5px solid #841414;
+  border-radius: 8px;
+  padding: 13px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font);
+  color: var(--muted);
+  cursor: pointer;
+  background-color: #841414;
+  color: #000000;
+}
+
+/* ========== LOADING ========== */
+.profile-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-size: 16px;
+  color: var(--muted);
+  background: var(--bg);
+}

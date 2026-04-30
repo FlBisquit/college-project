@@ -1,0 +1,56 @@
+
+/* ── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ────────────────────────────────────────────────── */
+body {
+  font-family: 'Sora', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #222629;
+  margin: 0;
+  overflow-y: auto;
+}
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #222629;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4a4d55;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #86C231;
+}
+
+/* ── Loading before React ─────────────────────────────────── */
+#root:empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #222629;
+}
+
+#root:empty::before {
+  content: "";
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

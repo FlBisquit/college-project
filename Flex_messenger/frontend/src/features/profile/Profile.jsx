@@ -1,0 +1,144 @@
+import { useEffect, useRef, useState, useMemo, memo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { getMe, updateProfile } from './profileSlice';
+import { logout } from '../auth/authSlice';
+import { Pencil } from 'lucide-react';
+import Loader from '../../components/Loader/Loader';
+import Header from '../../components/Header/Header';
+import './Profile.css';
+
+const BASE_URL = 'http://127.0.0.1:8000';
+
+const getAvatarSrc = (user, preview) => {
+  if (preview) return preview;
+  if (!user.avatar) return `${BASE_URL}/static/images/default_avatar.png`;
+  const url = user.avatar.startsWith('http') ? user.avatar : `${BASE_URL}${user.avatar}`;
+  return url;
+};
+
+function Profile() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user, isLoading } = useSelector((state) => state.profile);
+  const fileInputRef = useRef(null);
+
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [saveMessage, setSaveMessage] = useState('');
+  const [formData, setFormData] = useState(() => ({
+    email: user?.email || '',
+    bio: user?.bio || '',
+    date_birth: user?.date_birth || '',
+  }));
+
+  const avatarSrc = useMemo(() => user ? getAvatarSrc(user, avatarPreview) : '', [user, avatarPreview]);
+
+  useEffect(() => {
+    if (!user && !isLoading) {
+      dispatch(getMe());
+    }
+  }, [dispatch, user, isLoading]);
+
+  const handleChange = (e) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const handleSave = () => {
+    dispatch(updateProfile({
+      ...formData,
+      date_birth: formData.date_birth || null,
+      ...(avatarFile && { avatar: avatarFile }),
+    })).then((res) => {
+      if (updateProfile.fulfilled.match(res)) {
+        setAvatarPreview(null);
+        setAvatarFile(null);
+      }
+    });
+    setSaveMessage('Profile updated!');
+    setTimeout(() => setSaveMessage(''), 3000);
+  };
+
+  const handleLogout = async () => {
+    await dispatch(logout());
+    navigate('/');
+  };
+
+  if (!user) return <Loader />;
+
+  return (
+    <div className="auth-bg">
+      <Header />
+
+      <div className="auth-card profile-card">
+        <div className="profile-body">
+
+          {/* Avatar */}
+          <div className="profile-avatar-section">
+            <div className="profile-avatar-wrapper">
+              {avatarSrc ? (
+                <img src={avatarSrc} alt="avatar" className="profile-avatar-img" />
+              ) : (
+                <div className="profile-avatar-placeholder">
+                  {user.username?.[0]?.toUpperCase()}
+                </div>
+              )}
+            </div>
+            <button className="edit-avatar-btn" onClick={() => fileInputRef.current?.click()}>
+              <Pencil size={14} color="#1e1f22" />
+              Edit
+            </button>
+            <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
+          </div>
+
+          {/* Fields */}
+          <div className="profile-fields">
+            <div className="profile-field">
+              <label className="profile-label">Login</label>
+              <div className="auth-input-wrapper">
+                <input type="text" value={user.username} disabled />
+              </div>
+            </div>
+
+            <div className="profile-field">
+              <label className="profile-label">Email</label>
+              <div className="auth-input-wrapper">
+                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="your@email.com" />
+              </div>
+            </div>
+
+            <div className="profile-field">
+              <label className="profile-label">Bio</label>
+              <textarea className="profile-bio" name="bio" value={formData.bio} onChange={handleChange} placeholder="Add a bio" rows={4} />
+            </div>
+
+            <div className="profile-field">
+              <label className="profile-label">Date of Birth</label>
+              <div className="auth-input-wrapper">
+                <input type="date" name="date_birth" value={formData.date_birth} onChange={handleChange} />
+              </div>
+            </div>
+
+            {saveMessage && <div className="save-message">{saveMessage}</div>}
+          </div>
+        </div>
+
+        <div className="auth-divider" />
+
+        <div className="profile-actions">
+          <button onClick={handleLogout} className="btn-logout">Log out</button>
+          <button onClick={handleSave} className="auth-btn-next">Save <span className="btn-arrow">›</span></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default memo(Profile);

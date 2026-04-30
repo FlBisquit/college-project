@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flex Messenger - Подтверждение email</title>
+</head>
+<body style="margin:0;padding:0;background:#222629;font-family:'Segoe UI',Arial,sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#222629;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="520" cellpadding="0" cellspacing="0" style="width:520px;max-width:100%;">
+
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding-bottom:32px;">
+              <span style="font-size:24px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">
+                Flex Messenger
+              </span>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background:#464A4F;border-radius:24px;padding:48px 52px;">
+
+              <!-- Icon -->
+              <div style="text-align:center;margin:0 0 24px;">
+                <div style="display:inline-block;width:48px;height:32px;background:#86C231;border-radius:4px;position:relative;">
+                  <div style="position:absolute;top:0;left:0;width:100%;height:100%;">
+                    <div style="position:absolute;top:0;left:0;width:0;height:0;border-left:24px solid transparent;border-right:24px solid transparent;border-top:16px solid #6ba329;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Title -->
+              <h1 style="margin:0 0 12px;font-size:24px;font-weight:700;color:#ffffff;text-align:center;">
+                Подтвердите ваш email
+              </h1>
+
+              <!-- Subtitle -->
+              <p style="margin:0 0 32px;font-size:15px;color:#9ca3af;text-align:center;line-height:1.6;">
+                Привет, <span style="color:#ffffff;font-weight:600;">{{ username }}</span>!<br/>
+                Введите код ниже чтобы завершить регистрацию.
+              </p>
+
+              <!-- Code block -->
+              <div style="background:#2e3136;border-radius:16px;padding:28px;text-align:center;margin-bottom:32px;">
+                <p style="margin:0 0 8px;font-size:13px;color:#667085;text-transform:uppercase;letter-spacing:1px;">
+                  Код подтверждения
+                </p>
+                <p style="margin:0;font-size:40px;font-weight:700;color:#86C231;letter-spacing:12px;">
+                  {{ code }}
+                </p>
+              </div>
+
+               <!-- Expire notice -->
+               <p style="margin:0 0 32px;font-size:13px;color:#667085;text-align:center;">
+                 ⏱ Код действителен <span style="color:#ffffff;">5 минут</span>
+               </p>
+
+              <!-- Divider -->
+              <div style="height:1px;background:#3a3d45;margin-bottom:28px;"></div>
+
+              <!-- Footer note -->
+              <p style="margin:0;font-size:13px;color:#667085;text-align:center;line-height:1.6;">
+                Если вы не регистрировались в Flex Messenger просто проигнорируйте это письмо.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Bottom -->
+          <tr>
+            <td align="center" style="padding-top:28px;">
+              <p style="margin:0;font-size:12px;color:#4a4d55;">
+                © 2026 Flex Messenger. Все права защищены.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

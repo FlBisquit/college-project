@@ -1,0 +1,39 @@
+﻿# Django
+asgiref==3.11.0
+Django==6.0.1
+sqlparse==0.5.5
+tzdata==2025.3
+
+# Django REST Framework
+djangorestframework==3.14.0
+
+# CORS для React
+django-cors-headers==4.6.0
+
+# Работа с изображениями
+pillow>=11.2.0  
+
+# WebSocket (Channels)
+channels==4.2.0
+channels-redis==4.2.1
+daphne==4.2.1
+redis==7.1.0
+django-redis==5.4.0
+
+# Vite (если используете)
+django-vite==3.1.0
+
+# .env - переменные окружения
+python-decouple==3.8
+
+# Цветные логи в терминале
+colorlog==6.8.2
+
+# Асинхронные задачи
+celery==5.4.0
+
+# Tests
+pytest-django==4.7.0
+selenium==4.15.2
+pytest==7.4.3
+webdriver-manager==4.0.1
