@@ -137,9 +137,8 @@ const serversSlice = createSlice({
       .addCase(updateServer.fulfilled, (state, { payload }) => {
         state.isLoading = false;
         const updatedServer = payload.data || payload;
-        state.servers = state.servers.map(server =>
-          server.id === updatedServer.id ? updatedServer : server
-        );
+        state.servers = state.servers.map(s => s.id === updatedServer.id ? updatedServer : s);
+        state.myServers = state.myServers.map(s => s.id === updatedServer.id ? updatedServer : s); // ← добавить
       })
       .addCase(updateServer.rejected, (state, action) => {
         state.isLoading = false;
@@ -152,7 +151,8 @@ const serversSlice = createSlice({
       })
       .addCase(deleteServer.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.servers = state.servers.filter(server => server.id !== action.payload);
+        state.servers = state.servers.filter(s => s.id !== action.payload);
+        state.myServers = state.myServers.filter(s => s.id !== action.payload); // ← добавить
       })
       .addCase(deleteServer.rejected, (state, action) => {
         state.isLoading = false;

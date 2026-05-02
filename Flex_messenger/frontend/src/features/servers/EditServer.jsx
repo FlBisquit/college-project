@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { updateServer } from './serversSlice';
+import { updateServer, fetchServers } from './serversSlice';
 import { openModal } from '../modals/modalsSlice';
 import Header from '../../components/Header/Header';
 import './CreateServer.css';
@@ -11,7 +11,7 @@ const EditServer = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { servers, isLoading, error } = useSelector(state => state.servers);
+  const { servers, myServers, isLoading, error } = useSelector(state => state.servers);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -26,7 +26,7 @@ const EditServer = () => {
 
   useEffect(() => {
     // Находим сервер по id
-    const foundServer = servers.find(s => s.id === id);
+    const foundServer = [...servers, ...myServers].find(s => s.id === id);
     if (foundServer) {
       setServer(foundServer);
       setFormData({

@@ -56,9 +56,29 @@ const CreateServer = () => {
       return;
     }
 
-    const serversList = Array.isArray(currentServers) ? currentServers : (currentServers?.data || []);
+    const handleSubmit = async (e) => {
+      e.preventDefault();
 
-    if (serversList.length >= 5) return;
+      if (myServers.length >= 5) return;
+
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('description', formData.description);
+      data.append('is_public', formData.is_public);
+      data.append('max_members', formData.max_members);
+      if (formData.avatar) {
+        data.append('avatar', formData.avatar);
+      }
+
+      try {
+        await dispatch(createServer(data)).unwrap();
+        navigate('/');
+      } catch (err) {
+        console.error('Failed to create server:', err);
+      }
+    };
+
+    if (myServers.length >= 5) return;
 
     const data = new FormData();
     data.append('name', formData.name);

@@ -42,12 +42,24 @@ const ServerList = () => {
 
 
   const { myServers, publicServers } = useMemo(() => {
-    const data = Array.isArray(servers) ? servers : [];
-    return {
-      myServers: data.filter(s => s.is_owner === true),
-      publicServers: data.filter(s => !s.is_owner)
-    };
-  }, [servers]);
+  const data = Array.isArray(servers) ? servers : [];
+
+  const myServersList = [];
+  const publicServersList = [];
+
+  data.forEach(server => {
+    if (server.is_owner || server.is_member) {
+      myServersList.push(server);
+    } else {
+      publicServersList.push(server);
+    }
+  });
+
+  return {
+    myServers: myServersList,
+    publicServers: publicServersList,
+  };
+}, [servers]);
 
   if (isLoading || showLoader) return <Loader />;
 
@@ -57,17 +69,17 @@ const ServerList = () => {
       <div className="server-card-container">
         <h2 className="section-title">My servers</h2>
         <div className="servers-grid">
-          {myServers.map(server => (
-            <div
-              key={server.id}
-              className="server-tile"
-              onClick={() => navigate(`/servers/${server.id}`)}
-              onMouseEnter={() => setHoveredServer(server)}
-              onMouseLeave={() => setHoveredServer(null)}
-            >
-              <div className="tile-avatar-box">
-                <img src={server.avatar || getDefaultImage(server.id)} alt={server.name} />
-              </div>
+           {myServers.map(server => (
+             <div
+               key={server.id}
+               className="server-tile"
+               onClick={() => navigate(`/servers/${server.id}`)}
+               onMouseEnter={() => setHoveredServer(server)}
+               onMouseLeave={() => setHoveredServer(null)}
+             >
+               <div className="tile-avatar-box">
+                 <img src={server.avatar_url || getDefaultImage(server.id)} alt={server.name} />
+               </div>
               <button className="edit-server-btn" onClick={(e) => { e.stopPropagation(); navigate(`/servers/${server.id}/edit`); }}>
                 <Pencil size={16} color="#1e1f22" />
               </button>
@@ -91,17 +103,17 @@ const ServerList = () => {
       <div className="server-card-container public-servers">
         <h2 className="section-title">Public servers</h2>
         <div className="servers-grid">
-          {publicServers.map(server => (
-            <div
-              key={server.id}
-              className="server-tile"
-              onClick={() => navigate(`/servers/${server.id}/join`)}
-              onMouseEnter={() => setHoveredServer(server)}
-              onMouseLeave={() => setHoveredServer(null)}
-            >
-              <div className="tile-avatar-box">
-                <img src={server.avatar || getDefaultImage(server.id)} alt={server.name} />
-              </div>
+           {publicServers.map(server => (
+             <div
+               key={server.id}
+               className="server-tile"
+               onClick={() => navigate(`/servers/${server.id}`)}
+               onMouseEnter={() => setHoveredServer(server)}
+               onMouseLeave={() => setHoveredServer(null)}
+             >
+               <div className="tile-avatar-box">
+                 <img src={server.avatar_url || getDefaultImage(server.id)} alt={server.name} />
+               </div>
               {hoveredServer?.id === server.id && <ServerTooltip server={server} isMyServer={false} />}
             </div>
           ))}
