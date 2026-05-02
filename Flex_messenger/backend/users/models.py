@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone as tz
@@ -66,8 +67,8 @@ class User(AbstractUser):
 
     def avatar_url(self):
         if self.avatar:
-            return self.avatar.url
-        return '/static/images/default_avatar.png'
+            return f"{settings.SITE_URL}{self.avatar.url}"
+        return f"{settings.SITE_URL}/static/images/default_avatar.png"
 
     def __str__(self):
         return self.username

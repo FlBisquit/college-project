@@ -20,6 +20,7 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -36,7 +37,9 @@ INSTALLED_APPS = [
     'users',
     'servers',
     'chatting',
+    
 ]
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -113,6 +116,9 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
  
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Site URL for full URLs
+SITE_URL = 'http://localhost:8000'
  
 # ==================== DEFAULT PRIMARY KEY ====================
  
@@ -189,14 +195,13 @@ CACHES = {
     }
 }
  
-# ==================== CHANNELS (WebSocket) ====================
-# 🔒 Redis DB 0 для WebSocket channel layers
+
  
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
         },
     },
 }

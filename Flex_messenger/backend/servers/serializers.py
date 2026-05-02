@@ -17,6 +17,7 @@ class ServerSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
     members_count = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
+    is_member = serializers.SerializerMethodField()
 
     class Meta:
         model = Server
@@ -30,6 +31,7 @@ class ServerSerializer(serializers.ModelSerializer):
             'owner',
             'members_count',
             'is_owner',
+            'is_member',
             'is_public',
             'created_at'
         ]
@@ -60,6 +62,12 @@ class ServerSerializer(serializers.ModelSerializer):
 
     def validate_avatar(self, value):
         return validate_avatar_file(value)
+    
+    def get_is_member(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.server_members.filter(user=request.user).exists()
+        return False
 
 
 class ServerDetailSerializer(ServerSerializer):

@@ -33,6 +33,7 @@ class RegisterView(views.APIView):
             # Для superuser подтверждение не требуется, email не отправляется
             pass
         else:
+            from .services import VerificationService
             from .tasks import send_verification_email
             code = VerificationService.create_or_update(user) # type: ignore
             send_verification_email.delay(user.id, code) # type: ignore
@@ -180,7 +181,7 @@ class VerifyEmailView(views.APIView):
     def post(self, request):
         """
         Подтвердить email код.
-        Rate limit: 3 попытки в час.
+        Rate limit: 5 попыток в час.
         """
         user_id = request.data.get('user_id')
         code = request.data.get('code')
